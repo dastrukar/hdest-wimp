@@ -1,5 +1,23 @@
 version 4.6.0
 
+// Does what it says
+class HDBackpackReplacer : EventHandler {
+	override void WorldThingSpawned(WorldEvent e) {
+		let T = e.Thing;
+
+		if (T.GetClassName() == "HDBackpack" && HDBackpack(T).Owner) {
+			HDBackpack hdb = HDBackpack(T);
+			hdb.Owner.GiveInventory("WIMPack", 1);
+
+			WIMPack wimp = WIMPack(hdb.Owner.FindInventory("WIMPack"));
+			wimp.Storage = hdb.Storage;
+			wimp.MaxCapacity = hdb.MaxCapacity;
+
+			hdb.Destroy();
+		}
+	}
+}
+
 class WIMPack : HDBackpack replaces HDBackpack {
 	override void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl) {
 		int BaseOffset = -80;
@@ -73,7 +91,7 @@ class WIMPack : HDBackpack replaces HDBackpack {
 
 		sb.DrawImage(
 			SelItem.Icons[0],
-			(-40, BaseOffset + Offset.y + ((TextHeight + TextPadding) * 2)),
+			(-40, BaseOffset + Offset.y + (TextOffset * 2)),
 			sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER,
 			(!SelItem.HaveNone())? 1.0 : 0.8,
 			(50, 30),
@@ -86,7 +104,7 @@ class WIMPack : HDBackpack replaces HDBackpack {
 			"In backpack:  "..sb.FormatNumber(AmountInBackpack, 1, 6),
 			(0, BaseOffset + Offset.y + (TextOffset * 6)),
 			sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER,
-			AmountInBackpack > 0 ? Font.CR_BROWN : Font.CR_DARKBROWN
+			(AmountInBackpack > 0)? Font.CR_BROWN : Font.CR_DARKBROWN
 		);
 
 		int AmountOnPerson = GetAmountOnPerson(hpl.FindInventory(SelItem.ItemClass));
@@ -95,7 +113,17 @@ class WIMPack : HDBackpack replaces HDBackpack {
 			"On person:  "..sb.FormatNumber(AmountOnPerson, 1, 6),
 			(0, BaseOffset + TextHeight + Offset.y + (TextOffset * 6)),
 			sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER,
-			AmountOnPerson > 0 ?  Font.CR_WHITE : Font.CR_DARKGRAY
+			(AmountOnPerson > 0)?  Font.CR_WHITE : Font.CR_DARKGRAY
 		);
+	}
+}
+
+// Random backpacks
+class WildWIMPack : IdleDummy replaces WildBackpack {
+	override void PostBeginPlay() {
+		Super.PostBeginPlay();
+		let aaa = WIMPack(Spawn("WIMPack", pos, ALLOW_REPLACE));
+		aaa.RandomContents();
+		Destroy();
 	}
 }
