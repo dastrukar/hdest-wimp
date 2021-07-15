@@ -1,6 +1,6 @@
 version 4.6.0
 
-class WIMPack : HDBackpack {
+class WIMPack : HDBackpack replaces HDBackpack {
 	override void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl) {
 		int BaseOffset = -80;
 
@@ -36,8 +36,8 @@ class WIMPack : HDBackpack {
 				i = 2;
 			}
 
-			Vector2 ListOffset = ((i == 2)? 0 : 10, BaseOffset + Offset.y + (TextOffset * i));
-			Vector2 IconOffset = (-20, ListOffset.y);
+			Vector2 ListOffset = ((i == 2)? 10 : 20, BaseOffset + Offset.y + (TextOffset * i));
+			Vector2 IconOffset = (-30, ListOffset.y);
 
 			int FontColour = 0;
 			if (i == 2) {
@@ -73,7 +73,7 @@ class WIMPack : HDBackpack {
 
 		sb.DrawImage(
 			SelItem.Icons[0],
-			(-30, BaseOffset + Offset.y + ((TextHeight + TextPadding) * 2)),
+			(-40, BaseOffset + Offset.y + ((TextHeight + TextPadding) * 2)),
 			sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER,
 			(!SelItem.HaveNone())? 1.0 : 0.8,
 			(50, 30),
