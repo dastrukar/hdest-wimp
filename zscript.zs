@@ -32,7 +32,7 @@ class WIMPItemStorage play {
 		return null;
 	}
 
-	void UpdateStorage(ItemStorage Storage) {
+	virtual void UpdateStorage(ItemStorage Storage) {
 		if (!Storage) {
 			return;
 		}
@@ -79,6 +79,35 @@ class WIMPItemStorage play {
 	}
 }
 
+class WOMPItemStorage : WIMPItemStorage {
+	override void UpdateStorage(ItemStorage Storage) {
+		if (!Storage) {
+			return;
+		}
+
+		// just clear it
+		Items.Clear();
+		ActualIndex.Clear();
+
+		for (int i = 0; i < Storage.Items.Size(); i++) {
+			StorageItem Item = Storage.Items[i];
+
+			// Is the item in the backpack AND not already in Items?
+			if (
+				Item &&
+				Item.HaveNone()
+			) {
+				Items.Push(Item);
+				ActualIndex.Push(i);
+			}
+		}
+
+		if (Items.Size()) {
+			ClampSelItemIndex();
+		}
+	}
+}
+
 class WIMPack : HDBackpack replaces HDBackpack {
 	// 0 - All: Shows all items
 	// 1 - WIMP(What's In My Pack): Shows items in backpack
@@ -86,11 +115,13 @@ class WIMPack : HDBackpack replaces HDBackpack {
 	static const string WIMPModes[] = {"All", "WIMP", "WOMP"};
 	int SortMode;
 	WIMPItemStorage WIMP;
+	WOMPItemStorage WOMP;
 
 	override void BeginPlay() {
 		Super.BeginPlay();
 		SortMode = 0;
 		WIMP = New("WIMPItemStorage");
+		WOMP = New("WOMPItemStorage");
 	}
 
 	override void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl) {
@@ -111,25 +142,31 @@ class WIMPack : HDBackpack replaces HDBackpack {
 			Modes[i] = WIMPModes[Mode];
 		}
 
-		int ItemCount = (SortMode > 0)? WIMP.Items.Size() : Storage.Items.Size();
+		WIMPItemStorage WIS;
+		if (SortMode == 1) {
+			WIS = WIMP;
+		} else {
+			WIS = WOMP;
+		}
+		int ItemCount = (SortMode > 0)? WIS.Items.Size() : Storage.Items.Size();
 
 		if (ItemCount == 0) {
 			sb.DrawString(sb.pSmallFont, "No items found.", (0, BaseOffset + 30), sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER, Font.CR_DARKGRAY);
 			return;
 		}
 
-		StorageItem SelItem = (SortMode > 0)? WIMP.GetSelectedItem() : Storage.GetSelectedItem();
+		StorageItem SelItem = (SortMode > 0)? WIS.GetSelectedItem() : Storage.GetSelectedItem();
 		if (!SelItem) {
 			return;
 		}
 
 		for (int i = 0; i < (ItemCount > 1 ? 5 : 1); ++i) {
-			int ItemIndex = (SortMode > 0)? WIMP.SelItemIndex : Storage.SelItemIndex;
+			int ItemIndex = (SortMode > 0)? WIS.SelItemIndex : Storage.SelItemIndex;
 			int RealIndex = (ItemIndex + (i - 2)) % ItemCount;
 			if (RealIndex < 0) {
 				RealIndex = ItemCount - abs(RealIndex);
 			}
-			StorageItem CurItem = (SortMode > 0)? WIMP.Items[RealIndex] : Storage.Items[RealIndex];
+			StorageItem CurItem = (SortMode > 0)? WIS.Items[RealIndex] : Storage.Items[RealIndex];
 
 			// Overwrite i?
 			if (ItemCount == 1) {
@@ -242,32 +279,44 @@ class WIMPack : HDBackpack replaces HDBackpack {
 
 	action void A_SyncStorage() {
 		ItemStorage S = Invoker.Storage;
-		WIMPItemStorage WIS = Invoker.WIMP;
-		Invoker.A_Log("WIS.Items.Size():"..WIS.Items.Size().." S.Items.Size():"..S.Items.Size().." WIS.SelItemIndex:"..WIS.SelItemIndex.." S.SelItemIndex:"..S.SelItemIndex);
+		WIMPItemStorage WIMP = Invoker.WIMP;
+		WOMPItemStorage WOMP = Invoker.WOMP;
 
-		WIS.UpdateStorage(S);
+		WIMP.UpdateStorage(S);
+		WOMP.UpdateStorage(S);
 		switch (Invoker.SortMode) {
 			case 0:
-				WIS.SelItemIndex = Clamp(WIS.ActualIndex.Find(S.SelItemIndex), 0, (WIS.ActualIndex.Size() > 0)? WIS.ActualIndex.Size() - 1 : 0);
+				WIMP.SelItemIndex = Clamp(WIMP.ActualIndex.Find(S.SelItemIndex), 0, (WIMP.ActualIndex.Size() > 0)? WIMP.ActualIndex.Size() - 1 : 0);
+				WOMP.SelItemIndex = Clamp(WOMP.ActualIndex.Find(S.SelItemIndex), 0, (WOMP.ActualIndex.Size() > 0)? WOMP.ActualIndex.Size() - 1 : 0);
 				break;
 
 			case 1:
-				S.SelItemIndex = (WIS.ActualIndex.Size() > 0)? WIS.ActualIndex[WIS.SelItemIndex] : 0;
+				S.SelItemIndex = (WIMP.ActualIndex.Size() > 0)? WIMP.ActualIndex[WIMP.SelItemIndex] : 0;
 				break;
 
 			case 2:
-				S.SelItemIndex = (WIS.ActualIndex.Size() > 0)? WIS.ActualIndex[WIS.SelItemIndex] : 0;
+				S.SelItemIndex = (WOMP.ActualIndex.Size() > 0)? WOMP.ActualIndex[WOMP.SelItemIndex] : 0;
 				break;
 		}
 	}
 
 	action void A_DoWIMP() {
-		// Hijack the max amount of items
 		ItemStorage S = Invoker.Storage;
 		WIMPItemStorage WIS = Invoker.WIMP;
 
 		WIS.UpdateStorage(S);
+		A_HijackMouseInput(WIS);
+	}
 
+	action void A_DoWOMP() {
+		ItemStorage S = Invoker.Storage;
+		WOMPItemStorage WIS = Invoker.WOMP;
+
+		WIS.UpdateStorage(S);
+		A_HijackMouseInput(WIS);
+	}
+
+	action void A_HijackMouseInput(WIMPItemStorage WIS) {
 		if (WIS.Items.Size() < 1) {
 			return;
 		}
@@ -324,8 +373,9 @@ class WIMPack : HDBackpack replaces HDBackpack {
 					case 1:
 						A_DoWIMP();
 						break;
+
 					case 2:
-						A_DoWIMP();
+						A_DoWOMP();
 						break;
 				}
 			}
