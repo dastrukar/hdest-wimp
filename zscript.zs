@@ -1,9 +1,9 @@
 version 4.6.0
 
 // Base
-#include "zscript/wimp.zs"
-#include "zscript/eventhandlers.zs"
+#include "zscript/wimp-base.zs"
+#include "zscript/wimp-eventhandlers.zs"
 
 // Items
-#include "zscript/backpack.zs
-#include "zscript/ammopouch.zs"
+#include "zscript/wimp-backpack.zs"
+#include "zscript/wimp-ammopouch.zs"
