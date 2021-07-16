@@ -11,3 +11,15 @@ WIMP adds three modes to the Backpack.
 - WOMP: Does the opposite of WIMP.
 
 You can switch between modes by crouching, and pressing either `Fire` or `AltFire` to cycle left and right respectively.
+
+## Legends
+```yaml
+===Acronyms===
+- WIMP: What's In My Pack?
+- WOMP: What's Outside My Pack?
+
+===Colours===
+- Green:  In Backpack
+- Yellow: Selected Item
+- Red:    On Person
+```
