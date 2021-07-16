@@ -167,73 +167,89 @@ class WIMPack : Thinker {
 		}
 		int ItemCount = (SortMode > 0)? WIS.Items.Size() : Storage.Items.Size();
 
-		if (ItemCount == 0) {
-			sb.DrawString(sb.pSmallFont, "No items found.", (0, BaseOffset + 30), sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER, Font.CR_DARKGRAY);
-			return;
-		}
-
-		StorageItem SelItem = (SortMode > 0)? WIS.GetSelectedItem() : Storage.GetSelectedItem();
-		if (!SelItem) {
-			return;
-		}
-
-		for (int i = 0; i < (ItemCount > 1 ? 5 : 1); ++i) {
-			int ItemIndex = (SortMode > 0)? WIS.SelItemIndex : Storage.SelItemIndex;
-			int RealIndex = (ItemIndex + (i - 2)) % ItemCount;
-			if (RealIndex < 0) {
-				RealIndex = ItemCount - abs(RealIndex);
-			}
-			StorageItem CurItem = (SortMode > 0)? WIS.Items[RealIndex] : Storage.Items[RealIndex];
-
-			// Overwrite i?
-			if (ItemCount == 1) {
-				i = 2;
+		if (ItemCount != 0) {
+			StorageItem SelItem = (SortMode > 0)? WIS.GetSelectedItem() : Storage.GetSelectedItem();
+			if (!SelItem) {
+				return;
 			}
 
-			Vector2 ListOffset = ((i == 2)? 10 : 20, BaseOffset + Offset.y + (TextOffset * i));
-			Vector2 IconOffset = (-30, ListOffset.y);
+			for (int i = 0; i < (ItemCount > 1 ? 5 : 1); ++i) {
+				int ItemIndex = (SortMode > 0)? WIS.SelItemIndex : Storage.SelItemIndex;
+				int RealIndex = (ItemIndex + (i - 2)) % ItemCount;
+				if (RealIndex < 0) {
+					RealIndex = ItemCount - abs(RealIndex);
+				}
+				StorageItem CurItem = (SortMode > 0)? WIS.Items[RealIndex] : Storage.Items[RealIndex];
 
-			int FontColour = 0;
-			if (i == 2) {
-				// Is selected
-				FontColour = Font.CR_FIRE;
-			} else if (CurItem.Amounts.Size() > 0) {
-				// In backpack
-				FontColour = Font.CR_GREEN;
-			}
+				// Overwrite i?
+				if (ItemCount == 1) {
+					i = 2;
+				}
 
-			// Draw list of items
-			// Icons
-			if (i != 2) {
-				sb.DrawImage(
-					CurItem.Icons[0],
-					IconOffset,
-					sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER,
-					(!CurItem.HaveNone())? 0.8 : 0.6,
-					(30, 20),
-					getdefaultbytype(CurItem.ItemClass).scale * 2.0
+				Vector2 ListOffset = ((i == 2)? 10 : 20, BaseOffset + Offset.y + (TextOffset * i));
+				Vector2 IconOffset = (-30, ListOffset.y);
+
+				int FontColour = 0;
+				if (i == 2) {
+					// Is selected
+					FontColour = Font.CR_FIRE;
+				} else if (CurItem.Amounts.Size() > 0) {
+					// In backpack
+					FontColour = Font.CR_GREEN;
+				}
+
+				// Draw list of items
+				// Icons
+				if (i != 2) {
+					sb.DrawImage(
+						CurItem.Icons[0],
+						IconOffset,
+						sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER,
+						(!CurItem.HaveNone())? 0.8 : 0.6,
+						(30, 20),
+						getdefaultbytype(CurItem.ItemClass).scale * 2.0
+					);
+				}
+
+				// Text
+				sb.DrawString(
+					sb.pSmallFont,
+					CurItem.NiceName,
+					ListOffset,
+					sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_LEFT,
+					FontColour
 				);
 			}
 
-			// Text
+			// Selected icon
+			sb.DrawImage(
+				SelItem.Icons[0],
+				(-40, BaseOffset + Offset.y + (TextOffset * 2)),
+				sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER,
+				(!SelItem.HaveNone())? 1.0 : 0.8,
+				(50, 30),
+				getdefaultbytype(SelItem.ItemClass).scale * 3.0
+			);
+
+			// Amount
+			int AmountInBackpack = (SelItem.ItemClass is 'HDMagAmmo')? SelItem.Amounts.Size() : ((SelItem.Amounts.Size() > 0)? SelItem.Amounts[0] : 0);
 			sb.DrawString(
 				sb.pSmallFont,
-				CurItem.NiceName,
-				ListOffset,
-				sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_LEFT,
-				FontColour
+				"In backpack:  "..sb.FormatNumber(AmountInBackpack, 1, 6),
+				(0, BaseOffset + Offset.y + (TextOffset * 6)),
+				sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER,
+				(AmountInBackpack > 0)? Font.CR_BROWN : Font.CR_DARKBROWN
+			);
+
+			int AmountOnPerson = GetAmountOnPerson(hpl.FindInventory(SelItem.ItemClass));
+			sb.DrawString(
+				sb.pSmallFont,
+				"On person:  "..sb.FormatNumber(AmountOnPerson, 1, 6),
+				(0, BaseOffset + TextHeight + Offset.y + (TextOffset * 6)),
+				sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER,
+				(AmountOnPerson > 0)?  Font.CR_WHITE : Font.CR_DARKGRAY
 			);
 		}
-
-		// Selected icon
-		sb.DrawImage(
-			SelItem.Icons[0],
-			(-40, BaseOffset + Offset.y + (TextOffset * 2)),
-			sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER,
-			(!SelItem.HaveNone())? 1.0 : 0.8,
-			(50, 30),
-			getdefaultbytype(SelItem.ItemClass).scale * 3.0
-		);
 
 		// Header
 		sb.DrawString(
@@ -275,23 +291,10 @@ class WIMPack : Thinker {
 			sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_LEFT
 		);
 
-		int AmountInBackpack = (SelItem.ItemClass is 'HDMagAmmo')? SelItem.Amounts.Size() : ((SelItem.Amounts.Size() > 0)? SelItem.Amounts[0] : 0);
-		sb.DrawString(
-			sb.pSmallFont,
-			"In backpack:  "..sb.FormatNumber(AmountInBackpack, 1, 6),
-			(0, BaseOffset + Offset.y + (TextOffset * 6)),
-			sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER,
-			(AmountInBackpack > 0)? Font.CR_BROWN : Font.CR_DARKBROWN
-		);
-
-		int AmountOnPerson = GetAmountOnPerson(hpl.FindInventory(SelItem.ItemClass));
-		sb.DrawString(
-			sb.pSmallFont,
-			"On person:  "..sb.FormatNumber(AmountOnPerson, 1, 6),
-			(0, BaseOffset + TextHeight + Offset.y + (TextOffset * 6)),
-			sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER,
-			(AmountOnPerson > 0)?  Font.CR_WHITE : Font.CR_DARKGRAY
-		);
+		if (ItemCount == 0) {
+			sb.DrawString(sb.pSmallFont, "No items found.", (0, BaseOffset + Offset.y), sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER, Font.CR_DARKGRAY);
+			return;
+		}
 	}
 
 	void SyncStorage(ItemStorage S) {
