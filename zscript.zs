@@ -8,9 +8,9 @@ class HDBackpackReplacer : EventHandler {
 
 		if (T.GetClassName() == "HDBackpack" && HDBackpack(T).Owner) {
 			HDBackpack hdb = HDBackpack(T);
-			hdb.Owner.GiveInventory("WIMPack", 1);
+			hdb.Owner.GiveInventory("WIMPHDBackpack", 1);
 
-			WIMPack wimp = WIMPack(hdb.Owner.FindInventory("WIMPack"));
+			WIMPHDBackpack wimp = WIMPHDBackpack(hdb.Owner.FindInventory("WIMPHDBackpack"));
 			wimp.Storage = hdb.Storage;
 			wimp.MaxCapacity = hdb.MaxCapacity;
 
@@ -108,7 +108,7 @@ class WOMPItemStorage : WIMPItemStorage {
 	}
 }
 
-class WIMPack : HDBackpack replaces HDBackpack {
+class WIMPack : Thinker {
 	// 0 - All: Shows all items
 	// 1 - WIMP(What's In My Pack): Shows items in backpack
 	// 2 - WOMP(What's Outside My Pack): Does the opposite of WIMP
@@ -117,14 +117,22 @@ class WIMPack : HDBackpack replaces HDBackpack {
 	WIMPItemStorage WIMP;
 	WOMPItemStorage WOMP;
 
-	override void BeginPlay() {
-		Super.BeginPlay();
-		SortMode = 0;
-		WIMP = New("WIMPItemStorage");
-		WOMP = New("WOMPItemStorage");
+	// Some stuff from HDBackpack's code
+	clearscope int GetAmountOnPerson(Inventory Item) {
+		let wpn = HDWeapon(item);
+		let pkp = HDPickup(item);
+
+		return wpn ? wpn.ActualAmount : pkp ? pkp.Amount : 0;
 	}
 
-	override void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl) {
+	bool JustPressed(HDPlayerPawn Owner, int whichbutton) {
+		return(
+			Owner.Player.cmd.Buttons & whichbutton &&
+			!(Owner.Player.OldButtons & whichbutton)
+		);
+	}
+
+	ui void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl, ItemStorage Storage) {
 		int BaseOffset = -80;
 		int TextHeight = sb.pSmallFont.mFont.GetHeight();
 		int TextPadding = TextHeight / 2;
@@ -277,14 +285,10 @@ class WIMPack : HDBackpack replaces HDBackpack {
 		);
 	}
 
-	action void A_SyncStorage() {
-		ItemStorage S = Invoker.Storage;
-		WIMPItemStorage WIMP = Invoker.WIMP;
-		WOMPItemStorage WOMP = Invoker.WOMP;
-
+	void SyncStorage(ItemStorage S) {
 		WIMP.UpdateStorage(S);
 		WOMP.UpdateStorage(S);
-		switch (Invoker.SortMode) {
+		switch (SortMode) {
 			case 0:
 				WIMP.SelItemIndex = Clamp(WIMP.ActualIndex.Find(S.SelItemIndex), 0, (WIMP.ActualIndex.Size() > 0)? WIMP.ActualIndex.Size() - 1 : 0);
 				WOMP.SelItemIndex = Clamp(WOMP.ActualIndex.Find(S.SelItemIndex), 0, (WOMP.ActualIndex.Size() > 0)? WOMP.ActualIndex.Size() - 1 : 0);
@@ -300,82 +304,90 @@ class WIMPack : HDBackpack replaces HDBackpack {
 		}
 	}
 
-	action void A_DoWIMP() {
-		ItemStorage S = Invoker.Storage;
-		WIMPItemStorage WIS = Invoker.WIMP;
-
-		WIS.UpdateStorage(S);
-		A_HijackMouseInput(WIS);
+	void DoWIMP(HDPlayerPawn Owner, ItemStorage S) {
+		WIMP.UpdateStorage(S);
+		HijackMouseInput(Owner, WIMP);
 	}
 
-	action void A_DoWOMP() {
-		ItemStorage S = Invoker.Storage;
-		WOMPItemStorage WIS = Invoker.WOMP;
-
-		WIS.UpdateStorage(S);
-		A_HijackMouseInput(WIS);
+	void DoWOMP(HDPlayerPawn Owner, ItemStorage S) {
+		WOMP.UpdateStorage(S);
+		HijackMouseInput(Owner, WOMP);
 	}
 
-	action void A_HijackMouseInput(WIMPItemStorage WIS) {
+	void HijackMouseInput(HDPlayerPawn Owner, WIMPItemStorage WIS) {
 		if (WIS.Items.Size() < 1) {
 			return;
 		}
 
-		if (JustPressed(BT_ATTACK)) {
+		if (JustPressed(Owner, BT_ATTACK)) {
 			WIS.PrevItem();
-		} else if (JustPressed(BT_ALTATTACK)) {
+		} else if (JustPressed(Owner, BT_ALTATTACK)) {
 			WIS.NextItem();
 		}
 	}
 
-	action bool A_CheckSwitch() {
+	bool CheckSwitch(HDPlayerPawn Owner, ItemStorage S) {
 		if (
-			Invoker &&
-			Invoker.Owner &&
-			Invoker.Owner.Player &&
-			Invoker.Owner.Player.CrouchFactor < 1.0
+			Owner.Player &&
+			Owner.Player.CrouchFactor < 1.0
 		) {
-			ItemStorage S = Invoker.Storage;
-			WIMPItemStorage WIS = Invoker.WIMP;
-
 			bool ChangedMode = false;
 
-			if (JustPressed(BT_ATTACK)) {
-				Invoker.SortMode--;
+			if (JustPressed(Owner, BT_ATTACK)) {
+				SortMode--;
 				ChangedMode = true;
-			} else if (JustPressed(BT_ALTATTACK)) {
-				Invoker.SortMode++;
+			} else if (JustPressed(Owner, BT_ALTATTACK)) {
+				SortMode++;
 				ChangedMode = true;
 			}
 
-			if (Invoker.SortMode > 2) {
-				Invoker.SortMode = 0;
-			} else if (Invoker.SortMode < 0) {
-				Invoker.SortMode = 2;
+			if (SortMode > 2) {
+				SortMode = 0;
+			} else if (SortMode < 0) {
+				SortMode = 2;
 			}
 
 			return ChangedMode;
 		}
 		return false;
 	}
+}
+
+class WIMPHDBackpack : HDBackpack replaces HDBackpack {
+	WIMPack WP;
+
+	override void BeginPlay() {
+		Super.BeginPlay();
+		WP = new("WIMPack");
+		WP.WIMP = new("WIMPItemStorage");
+		WP.WOMP = new("WOMPItemStorage");
+		WP.SortMode = 0;
+	}
+
+	override void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl) {
+		WP.DrawHUDStuff(sb, hdw, hpl, Storage);
+	}
 
 	States {
 		Ready:
 			TNT1 A 1 {
-				if (A_CheckSwitch()) {
+				ItemStorage S = Invoker.Storage;
+				WIMPack W = Invoker.WP;
+				HDPlayerPawn Owner = HDPlayerPawn(Invoker.Owner);
+				if (W.CheckSwitch(Owner, S)) {
 					return;
 				}
 
 				A_BPReady();
-				A_SyncStorage();
+				W.SyncStorage(S);
 
-				switch (Invoker.SortMode) {
+				switch (W.SortMode) {
 					case 1:
-						A_DoWIMP();
+						W.DoWIMP(Owner, S);
 						break;
 
 					case 2:
-						A_DoWOMP();
+						W.DoWOMP(Owner, S);
 						break;
 				}
 			}
@@ -387,7 +399,7 @@ class WIMPack : HDBackpack replaces HDBackpack {
 class WildWIMPack : IdleDummy replaces WildBackpack {
 	override void PostBeginPlay() {
 		Super.PostBeginPlay();
-		let aaa = WIMPack(Spawn("WIMPack", pos, ALLOW_REPLACE));
+		let aaa = WIMPHDBackpack(Spawn("WIMPHDBackpack", pos, ALLOW_REPLACE));
 		aaa.RandomContents();
 		Destroy();
 	}
