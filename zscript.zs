@@ -1,5 +1,6 @@
 version 4.6.0
 
+
 // Does what it says
 class HDBackpackReplacer : EventHandler {
 	override void WorldThingSpawned(WorldEvent e) {
@@ -82,6 +83,7 @@ class WIMPack : HDBackpack replaces HDBackpack {
 	// 0 - All: Shows all items
 	// 1 - WIMP(What's In My Pack): Shows items in backpack
 	// 2 - WOMP(What's Outside My Pack): Does the opposite of WIMP
+	static const string WIMPModes[] = {"All", "WIMP", "WOMP"};
 	int SortMode;
 	WIMPItemStorage WIMP;
 
@@ -93,34 +95,41 @@ class WIMPack : HDBackpack replaces HDBackpack {
 
 	override void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl) {
 		int BaseOffset = -80;
+		int TextHeight = sb.pSmallFont.mFont.GetHeight();
+		int TextPadding = TextHeight / 2;
+		int TextOffset = TextHeight + TextPadding;
+		Vector2 Offset = (0, TextHeight * 6);
 
-		sb.DrawString(sb.pSmallFont, "\c[DarkBrown][] [] [] \c[Tan]Backpack\c[DarkBrown][] [] []", (0, BaseOffset), sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER);
-		sb.DrawString(sb.pSmallFont, "Total Bulk: \cf"..int(Storage.TotalBulk).."\c-", (0, BaseOffset + 10), sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER);
+		// Get modes
+		string Modes[3];
+		for (int i = 0; i < Modes.Size(); i++) {
+			int Mode = (SortMode + (i - 1)) % Modes.Size();
+			if (Mode < 0) {
+				Mode = Modes.Size() - Abs(Mode);
+			}
 
-		int ItemCount = (SortMode == 1)? WIMP.Items.Size() : Storage.Items.Size();
+			Modes[i] = WIMPModes[Mode];
+		}
+
+		int ItemCount = (SortMode > 0)? WIMP.Items.Size() : Storage.Items.Size();
 
 		if (ItemCount == 0) {
 			sb.DrawString(sb.pSmallFont, "No items found.", (0, BaseOffset + 30), sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER, Font.CR_DARKGRAY);
 			return;
 		}
 
-		StorageItem SelItem = (SortMode == 1)? WIMP.GetSelectedItem() : Storage.GetSelectedItem();
+		StorageItem SelItem = (SortMode > 0)? WIMP.GetSelectedItem() : Storage.GetSelectedItem();
 		if (!SelItem) {
 			return;
 		}
 
-		Vector2 Offset = (0, 30);
-		int TextHeight = sb.pSmallFont.mFont.GetHeight();
-		int TextPadding = TextHeight / 2;
-		int TextOffset = TextHeight + TextPadding;
-
 		for (int i = 0; i < (ItemCount > 1 ? 5 : 1); ++i) {
-			int ItemIndex = (SortMode == 1)? WIMP.SelItemIndex : Storage.SelItemIndex;
+			int ItemIndex = (SortMode > 0)? WIMP.SelItemIndex : Storage.SelItemIndex;
 			int RealIndex = (ItemIndex + (i - 2)) % ItemCount;
 			if (RealIndex < 0) {
 				RealIndex = ItemCount - abs(RealIndex);
 			}
-			StorageItem CurItem = (SortMode == 1)? WIMP.Items[RealIndex] : Storage.Items[RealIndex];
+			StorageItem CurItem = (SortMode > 0)? WIMP.Items[RealIndex] : Storage.Items[RealIndex];
 
 			// Overwrite i?
 			if (ItemCount == 1) {
@@ -162,6 +171,7 @@ class WIMPack : HDBackpack replaces HDBackpack {
 			);
 		}
 
+		// Selected icon
 		sb.DrawImage(
 			SelItem.Icons[0],
 			(-40, BaseOffset + Offset.y + (TextOffset * 2)),
@@ -169,6 +179,46 @@ class WIMPack : HDBackpack replaces HDBackpack {
 			(!SelItem.HaveNone())? 1.0 : 0.8,
 			(50, 30),
 			getdefaultbytype(SelItem.ItemClass).scale * 3.0
+		);
+
+		// Header
+		sb.DrawString(
+			sb.pSmallFont,
+			"\c[DarkBrown][] [] [] \c[Tan]Backpack\c[DarkBrown][] [] []",
+			(0, BaseOffset),
+			sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER
+		);
+		sb.DrawString(
+			sb.pSmallFont,
+			"Total Bulk: \cf"..int(Storage.TotalBulk).."\c-",
+			(0, BaseOffset + TextHeight),
+			sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER
+		);
+
+		// Modes
+		sb.DrawString(
+			sb.pSmallFont,
+			"Current Mode:",
+			(0, BaseOffset + TextHeight * 3),
+			sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER
+		);
+		sb.DrawString(
+			sb.pSmallFont,
+			"\c[Cyan]<\c[Gold]"..Modes[1].."\c[Cyan]>",
+			(0, BaseOffset + TextHeight * 4),
+			sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER
+		);
+		sb.DrawString(
+			sb.pSmallFont,
+			"\c[DarkGray]["..Modes[0].."]",
+			(-50, BaseOffset + TextHeight * 4),
+			sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_RIGHT
+		);
+		sb.DrawString(
+			sb.pSmallFont,
+			"\c[DarkGray]["..Modes[2].."]",
+			(50, BaseOffset + TextHeight * 4),
+			sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_LEFT
 		);
 
 		int AmountInBackpack = (SelItem.ItemClass is 'HDMagAmmo')? SelItem.Amounts.Size() : ((SelItem.Amounts.Size() > 0)? SelItem.Amounts[0] : 0);
@@ -202,6 +252,10 @@ class WIMPack : HDBackpack replaces HDBackpack {
 				break;
 
 			case 1:
+				S.SelItemIndex = (WIS.ActualIndex.Size() > 0)? WIS.ActualIndex[WIS.SelItemIndex] : 0;
+				break;
+
+			case 2:
 				S.SelItemIndex = (WIS.ActualIndex.Size() > 0)? WIS.ActualIndex[WIS.SelItemIndex] : 0;
 				break;
 		}
@@ -238,17 +292,17 @@ class WIMPack : HDBackpack replaces HDBackpack {
 			bool ChangedMode = false;
 
 			if (JustPressed(BT_ATTACK)) {
-				Invoker.SortMode++;
+				Invoker.SortMode--;
 				ChangedMode = true;
 			} else if (JustPressed(BT_ALTATTACK)) {
-				Invoker.SortMode--;
+				Invoker.SortMode++;
 				ChangedMode = true;
 			}
 
-			if (Invoker.SortMode > 1) {
+			if (Invoker.SortMode > 2) {
 				Invoker.SortMode = 0;
 			} else if (Invoker.SortMode < 0) {
-				Invoker.SortMode = 1;
+				Invoker.SortMode = 2;
 			}
 
 			return ChangedMode;
@@ -268,6 +322,9 @@ class WIMPack : HDBackpack replaces HDBackpack {
 
 				switch (Invoker.SortMode) {
 					case 1:
+						A_DoWIMP();
+						break;
+					case 2:
 						A_DoWIMP();
 						break;
 				}
