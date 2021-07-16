@@ -18,21 +18,71 @@ class HDBackpackReplacer : EventHandler {
 	}
 }
 
+class WIMPItemStorage play {
+	Array<StorageItem> Items; // Stores items for sorting
+	Array<int> ActualIndex;   // Used for referring back to the original index in Storage
+	int SelItemIndex;
+
+	clearscope StorageItem GetSelectedItem() {
+		if (!(SelItemIndex > Items.Size())) {
+			return Items[SelItemIndex];
+		}
+
+		return null;
+	}
+
+	void UpdateStorage(ItemStorage Storage) {
+		if (!Storage) {
+			return;
+		}
+
+		// just clear it
+		Items.Clear();
+		ActualIndex.Clear();
+
+		for (int i = 0; i < Storage.Items.Size(); i++) {
+			StorageItem Item = Storage.Items[i];
+
+			// Is the item in the backpack AND not already in Items?
+			if (
+				Item &&
+				!Item.HaveNone() &&
+				Items.Find(Item) == Items.Size()
+			) {
+				Items.Insert(0, Item);
+				ActualIndex.Insert(0, i);
+			}
+		}
+	}
+}
+
 class WIMPack : HDBackpack replaces HDBackpack {
+	// 0 - All: Shows all items
+	// 1 - WIMP(What's In My Pack): Shows items in backpack
+	// 2 - WOMP(What's Outside My Pack): Does the opposite of WIMP
+	int SortMode;
+	WIMPItemStorage WIMP;
+
+	override void BeginPlay() {
+		Super.BeginPlay();
+		SortMode = 0;
+		WIMP = New("WIMPItemStorage");
+	}
+
 	override void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl) {
 		int BaseOffset = -80;
 
 		sb.DrawString(sb.pSmallFont, "\c[DarkBrown][] [] [] \c[Tan]Backpack\c[DarkBrown][] [] []", (0, BaseOffset), sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER);
 		sb.DrawString(sb.pSmallFont, "Total Bulk: \cf"..int(Storage.TotalBulk).."\c-", (0, BaseOffset + 10), sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER);
 
-		int ItemCount = Storage.Items.Size();
+		int ItemCount = (SortMode == 1)? WIMP.Items.Size() : Storage.Items.Size();
 
 		if (ItemCount == 0) {
 			sb.DrawString(sb.pSmallFont, "No items found.", (0, BaseOffset + 30), sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER, Font.CR_DARKGRAY);
 			return;
 		}
 
-		StorageItem SelItem = Storage.GetSelectedItem();
+		StorageItem SelItem = (SortMode == 1)? WIMP.GetSelectedItem() : Storage.GetSelectedItem();
 		if (!SelItem) {
 			return;
 		}
@@ -43,11 +93,12 @@ class WIMPack : HDBackpack replaces HDBackpack {
 		int TextOffset = TextHeight + TextPadding;
 
 		for (int i = 0; i < (ItemCount > 1 ? 5 : 1); ++i) {
-			int RealIndex = (Storage.SelItemIndex + (i - 2)) % ItemCount;
+			int ItemIndex = (SortMode == 1)? WIMP.SelItemIndex : Storage.SelItemIndex;
+			int RealIndex = (ItemIndex + (i - 2)) % ItemCount;
 			if (RealIndex < 0) {
 				RealIndex = ItemCount - abs(RealIndex);
 			}
-			StorageItem CurItem = Storage.Items[RealIndex];
+			StorageItem CurItem = (SortMode == 1)? WIMP.Items[RealIndex] : Storage.Items[RealIndex];
 
 			// Overwrite i?
 			if (ItemCount == 1) {
@@ -82,7 +133,7 @@ class WIMPack : HDBackpack replaces HDBackpack {
 			// Text
 			sb.DrawString(
 				sb.pSmallFont,
-				Storage.Items[RealIndex].NiceName,
+				CurItem.NiceName,
 				ListOffset,
 				sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_LEFT,
 				FontColour
@@ -115,6 +166,79 @@ class WIMPack : HDBackpack replaces HDBackpack {
 			sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER,
 			(AmountOnPerson > 0)?  Font.CR_WHITE : Font.CR_DARKGRAY
 		);
+	}
+
+	action void A_DoWIMP() {
+		// Hijack the max amount of items
+		ItemStorage S = Invoker.Storage;
+		WIMPItemStorage WIS = Invoker.WIMP;
+		Invoker.A_Log("WIS.Items.Size():"..WIS.Items.Size().." S.Items.Size():"..S.Items.Size().." WIS.SelItemIndex:"..WIS.SelItemIndex);
+
+		WIS.UpdateStorage(S);
+
+		if (WIS.Items.Size() < 1) {
+			return;
+		}
+
+		int TempIndex = WIS.SelItemIndex;
+		if (JustPressed(BT_ATTACK)) {
+			TempIndex--;
+		} else if (JustPressed(BT_ALTATTACK)) {
+			TempIndex++;
+		}
+
+		if (TempIndex < 0) {
+			TempIndex = WIS.Items.Size() - 1;
+		} else if (TempIndex >= WIS.Items.Size()) {
+			TempIndex = 0;
+		}
+
+		// No negative index
+		if (TempIndex < 0) {
+			TempIndex = 0;
+		}
+
+		WIS.SelItemIndex = TempIndex;
+		S.SelItemIndex = WIS.ActualIndex[TempIndex];
+	}
+
+	action void A_CheckSwitch() {
+		if (
+			Invoker &&
+			Invoker.Owner &&
+			Invoker.Owner.Player &&
+			Invoker.Owner.Player.CrouchFactor < 1.0
+		) {
+			ItemStorage S = Invoker.Storage;
+			if (JustPressed(BT_ATTACK)) {
+				Invoker.SortMode++;
+				S.NextItem();
+			} else if (JustPressed(BT_ALTATTACK)) {
+				Invoker.SortMode--;
+				S.PrevItem();
+			}
+
+			if (Invoker.SortMode > 1) {
+				Invoker.SortMode = 0;
+			} else if (Invoker.SortMode < 0) {
+				Invoker.SortMode = 1;
+			}
+		}
+	}
+
+	States {
+		Ready:
+			TNT1 A 1 {
+				A_BPReady();
+				A_CheckSwitch();
+
+				switch (Invoker.SortMode) {
+					case 1:
+						A_DoWIMP();
+						break;
+				}
+			}
+			Goto ReadyEnd;
 	}
 }
 
