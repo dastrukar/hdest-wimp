@@ -1,0 +1,15 @@
+OptionMenu "WIMPOptions" {
+	Title "WIMP Options"
+
+	StaticText "=In Backpack=", "Cyan"
+	Option "Selected Colour", "hdwimp_wimp_selected_colour", "TextColors"
+	Option "Not Selected Colour", "hdwimp_wimp_colour", "TextColors"
+	StaticText " "
+	StaticText "=On Person=", "Cyan"
+	Option "Selected Colour", "hdwimp_womp_selected_colour", "TextColors"
+	Option "Not Selected Colour", "hdwimp_womp_colour", "TextColors"
+}
+
+AddOptionMenu "OptionsMenu" {
+	SubMenu "WIMP Options", "WIMPOptions"
+}

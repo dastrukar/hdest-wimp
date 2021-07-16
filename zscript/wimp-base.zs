@@ -159,15 +159,16 @@ class WIMPack : Thinker {
 				Vector2 ListOffset = ((i == 2)? 10 : 20, BaseOffset + Offset.y + (TextOffset * i));
 				Vector2 IconOffset = (-30, ListOffset.y);
 
-				int FontColour = Font.CR_DARKRED;
+				int FontColour = hdwimp_womp_colour;
 				if (i == 2) {
 					// Is selected
-					//FontColour = Font.CR_FIRE;
-					FontColour = (SelItem.HaveNone())? 0 : Font.CR_GREEN;
+					FontColour = (SelItem.HaveNone())? hdwimp_womp_selected_colour : hdwimp_wimp_selected_colour;
 				} else if (CurItem.Amounts.Size() > 0) {
 					// In backpack
-					FontColour = Font.CR_DARKGREEN;
+					FontColour = hdwimp_wimp_colour;
 				}
+				// Just in case
+				FontColour = Clamp(FontColour, 0, Font.CR_TEAL);
 
 				// Draw list of items
 				// Icons
