@@ -19,7 +19,6 @@ You can switch between modes by crouching, and pressing either `Fire` or `AltFir
 - WOMP: What's Outside My Pack?
 
 ===Colours===
-- Green:  In Backpack
-- Yellow: Selected Item
-- Red:    On Person
+- Green: In Backpack
+- Red:   On Person
 ```
