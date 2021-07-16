@@ -182,7 +182,7 @@ class WIMPack : HDBackpack replaces HDBackpack {
 				FontColour = Font.CR_FIRE;
 			} else if (CurItem.Amounts.Size() > 0) {
 				// In backpack
-				FontColour = Font.CR_CYAN;
+				FontColour = Font.CR_GREEN;
 			}
 
 			// Draw list of items
