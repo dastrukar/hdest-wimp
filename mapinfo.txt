@@ -1,3 +1,4 @@
 GameInfo {
 	AddEventHandlers = "HDBackpackReplacer"
+	AddEventHandlers = "UaS_AmmoPouch_Replacer"
 }

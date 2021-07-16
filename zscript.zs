@@ -1,12 +1,19 @@
 version 4.6.0
 
+// Remove this to disable UaS support
+#include "ammopouch.zs"
+
 
 // Does what it says
 class HDBackpackReplacer : EventHandler {
 	override void WorldThingSpawned(WorldEvent e) {
 		let T = e.Thing;
 
-		if (T.GetClassName() == "HDBackpack" && HDBackpack(T).Owner) {
+		if (
+			T &&
+			T.GetClassName() == "HDBackpack" &&
+			HDBackpack(T).Owner
+		) {
 			HDBackpack hdb = HDBackpack(T);
 			hdb.Owner.GiveInventory("WIMPHDBackpack", 1);
 
