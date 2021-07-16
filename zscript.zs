@@ -49,10 +49,32 @@ class WIMPItemStorage play {
 				!Item.HaveNone() &&
 				Items.Find(Item) == Items.Size()
 			) {
-				Items.Insert(0, Item);
-				ActualIndex.Insert(0, i);
+				Items.Push(Item);
+				ActualIndex.Push(i);
 			}
 		}
+
+		if (Items.Size()) {
+			ClampSelItemIndex();
+		}
+	}
+
+	void ClampSelItemIndex() {
+		if (SelItemIndex >= Items.Size()) {
+			SelItemIndex = 0;
+		} else if (SelItemIndex < 0) {
+			SelItemIndex = Items.Size() - 1;
+		}
+	}
+
+	void NextItem() {
+		SelItemIndex++;
+		ClampSelItemIndex();
+	}
+
+	void PrevItem() {
+		SelItemIndex--;
+		ClampSelItemIndex();
 	}
 }
 
@@ -168,11 +190,27 @@ class WIMPack : HDBackpack replaces HDBackpack {
 		);
 	}
 
+	action void A_SyncStorage() {
+		ItemStorage S = Invoker.Storage;
+		WIMPItemStorage WIS = Invoker.WIMP;
+		Invoker.A_Log("WIS.Items.Size():"..WIS.Items.Size().." S.Items.Size():"..S.Items.Size().." WIS.SelItemIndex:"..WIS.SelItemIndex.." S.SelItemIndex:"..S.SelItemIndex);
+
+		WIS.UpdateStorage(S);
+		switch (Invoker.SortMode) {
+			case 0:
+				WIS.SelItemIndex = Clamp(WIS.ActualIndex.Find(S.SelItemIndex), 0, (WIS.ActualIndex.Size() > 0)? WIS.ActualIndex.Size() - 1 : 0);
+				break;
+
+			case 1:
+				S.SelItemIndex = (WIS.ActualIndex.Size() > 0)? WIS.ActualIndex[WIS.SelItemIndex] : 0;
+				break;
+		}
+	}
+
 	action void A_DoWIMP() {
 		// Hijack the max amount of items
 		ItemStorage S = Invoker.Storage;
 		WIMPItemStorage WIS = Invoker.WIMP;
-		Invoker.A_Log("WIS.Items.Size():"..WIS.Items.Size().." S.Items.Size():"..S.Items.Size().." WIS.SelItemIndex:"..WIS.SelItemIndex);
 
 		WIS.UpdateStorage(S);
 
@@ -180,29 +218,14 @@ class WIMPack : HDBackpack replaces HDBackpack {
 			return;
 		}
 
-		int TempIndex = WIS.SelItemIndex;
 		if (JustPressed(BT_ATTACK)) {
-			TempIndex--;
+			WIS.PrevItem();
 		} else if (JustPressed(BT_ALTATTACK)) {
-			TempIndex++;
+			WIS.NextItem();
 		}
-
-		if (TempIndex < 0) {
-			TempIndex = WIS.Items.Size() - 1;
-		} else if (TempIndex >= WIS.Items.Size()) {
-			TempIndex = 0;
-		}
-
-		// No negative index
-		if (TempIndex < 0) {
-			TempIndex = 0;
-		}
-
-		WIS.SelItemIndex = TempIndex;
-		S.SelItemIndex = WIS.ActualIndex[TempIndex];
 	}
 
-	action void A_CheckSwitch() {
+	action bool A_CheckSwitch() {
 		if (
 			Invoker &&
 			Invoker.Owner &&
@@ -210,12 +233,16 @@ class WIMPack : HDBackpack replaces HDBackpack {
 			Invoker.Owner.Player.CrouchFactor < 1.0
 		) {
 			ItemStorage S = Invoker.Storage;
+			WIMPItemStorage WIS = Invoker.WIMP;
+
+			bool ChangedMode = false;
+
 			if (JustPressed(BT_ATTACK)) {
 				Invoker.SortMode++;
-				S.NextItem();
+				ChangedMode = true;
 			} else if (JustPressed(BT_ALTATTACK)) {
 				Invoker.SortMode--;
-				S.PrevItem();
+				ChangedMode = true;
 			}
 
 			if (Invoker.SortMode > 1) {
@@ -223,14 +250,21 @@ class WIMPack : HDBackpack replaces HDBackpack {
 			} else if (Invoker.SortMode < 0) {
 				Invoker.SortMode = 1;
 			}
+
+			return ChangedMode;
 		}
+		return false;
 	}
 
 	States {
 		Ready:
 			TNT1 A 1 {
+				if (A_CheckSwitch()) {
+					return;
+				}
+
 				A_BPReady();
-				A_CheckSwitch();
+				A_SyncStorage();
 
 				switch (Invoker.SortMode) {
 					case 1:
