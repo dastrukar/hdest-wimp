@@ -3,6 +3,8 @@ version 4.6.0
 // Remove this to disable UaS support
 #include "ammopouch.zs"
 
+// I'm lazy to remove the event handler lol
+class UaS_AmmoPouch_Replacer : EventHandler {}
 
 // Does what it says
 class HDBackpackReplacer : EventHandler {
@@ -139,7 +141,7 @@ class WIMPack : Thinker {
 		);
 	}
 
-	ui void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl, ItemStorage Storage) {
+	ui void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl, ItemStorage Storage, string label) {
 		int BaseOffset = -80;
 		int TextHeight = sb.pSmallFont.mFont.GetHeight();
 		int TextPadding = TextHeight / 2;
@@ -236,7 +238,7 @@ class WIMPack : Thinker {
 		// Header
 		sb.DrawString(
 			sb.pSmallFont,
-			"\c[DarkBrown][] [] [] \c[Tan]Backpack\c[DarkBrown][] [] []",
+			"\c[DarkBrown][] [] [] \c[Tan]"..label.."\c[DarkBrown][] [] []",
 			(0, BaseOffset),
 			sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER
 		);
@@ -372,7 +374,7 @@ class WIMPHDBackpack : HDBackpack replaces HDBackpack {
 	}
 
 	override void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl) {
-		WP.DrawHUDStuff(sb, hdw, hpl, Storage);
+		WP.DrawHUDStuff(sb, hdw, hpl, Storage, "Backpack");
 	}
 
 	States {

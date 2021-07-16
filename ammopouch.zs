@@ -1,4 +1,4 @@
-class UaS_AmmoPouch_Replacer : EventHandler {
+extend class UaS_AmmoPouch_Replacer {
 	override void WorldThingSpawned(WorldEvent e) {
 		let T = e.Thing;
 
@@ -31,7 +31,7 @@ class WIMP_AmmoPouch : UaS_AmmoPouch replaces UaS_AmmoPouch {
 	}
 
 	override void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl) {
-		WP.DrawHUDStuff(sb, hdw, hpl, Storage);
+		WP.DrawHUDStuff(sb, hdw, hpl, Storage, "Ammo Pouch");
 	}
 
 	States {
