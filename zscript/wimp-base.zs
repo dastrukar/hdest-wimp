@@ -104,11 +104,21 @@ class WIMPack : Thinker {
 		return wpn ? wpn.ActualAmount : pkp ? pkp.Amount : 0;
 	}
 
+	bool PressingFiremode(HDPlayerPawn Owner) {
+		return Owner.Player.cmd.Buttons & BT_USER2;
+	}
 	bool JustPressed(HDPlayerPawn Owner, int whichbutton) {
 		return(
 			Owner.Player.cmd.Buttons & whichbutton &&
 			!(Owner.Player.OldButtons & whichbutton)
 		);
+	}
+
+	int GetMouseY(HDPlayerPawn Owner, bool hijack=false) {
+		if (hijack) {
+			Owner.reactiontime = max(Owner.reactiontime,1);
+		}
+		return Owner.Player.cmd.Pitch;
 	}
 
 	// Returns ColIn, ColOut, ColInSel, ColOutSel
@@ -359,10 +369,19 @@ class WIMPack : Thinker {
 			return;
 		}
 
-		if (JustPressed(Owner, BT_ATTACK)) {
-			WIS.PrevItem();
-		} else if (JustPressed(Owner, BT_ALTATTACK)) {
-			WIS.NextItem();
+		if (PressingFiremode(Owner)) {
+			int InputAmount = GetMouseY(Owner, true);
+			if (InputAmount < -5) {
+				WIS.PrevItem();
+			} else if (InputAmount > 5) {
+				WIS.NextItem();
+			}
+		} else {
+			if (JustPressed(Owner, BT_ATTACK)) {
+				WIS.PrevItem();
+			} else if (JustPressed(Owner, BT_ALTATTACK)) {
+				WIS.NextItem();
+			}
 		}
 	}
 
