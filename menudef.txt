@@ -1,13 +1,23 @@
+OptionValue "WIMPColourSchemes" {
+	0, "\cqFr\cdac\cata\crl"
+	1, "\cdD\cxas\cat"
+	2, "Old\cysch\csool"
+}
+
 OptionMenu "WIMPOptions" {
 	Title "WIMP Options"
 
-	StaticText "=In Backpack=", "Cyan"
-	Option "Selected Colour", "hdwimp_wimp_selected_colour", "TextColors"
-	Option "Not Selected Colour", "hdwimp_wimp_colour", "TextColors"
+	Option "Colour Scheme", "hdwimp_colourscheme", "WIMPColourSchemes"
 	StaticText " "
-	StaticText "=On Person=", "Cyan"
-	Option "Selected Colour", "hdwimp_womp_selected_colour", "TextColors"
-	Option "Not Selected Colour", "hdwimp_womp_colour", "TextColors"
+	StaticText "=Custom Colours=", "Gold"
+	Option "Use Custom Colours", "hdwimp_use_customcolourscheme", "YesNo"
+	StaticText "-In Backpack-", "Cyan"
+	Option "Selected Colour", "hdwimp_wimp_selected_colour", "TextColors", "hdwimp_use_customcolourscheme"
+	Option "Not Selected Colour", "hdwimp_wimp_colour", "TextColors", "hdwimp_use_customcolourscheme"
+	StaticText " "
+	StaticText "-On Person-", "Cyan"
+	Option "Selected Colour", "hdwimp_womp_selected_colour", "TextColors", "hdwimp_use_customcolourscheme"
+	Option "Not Selected Colour", "hdwimp_womp_colour", "TextColors", "hdwimp_use_customcolourscheme"
 }
 
 AddOptionMenu "OptionsMenu" {

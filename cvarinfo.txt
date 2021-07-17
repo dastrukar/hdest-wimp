@@ -2,3 +2,5 @@ nosave int hdwimp_wimp_selected_colour=3;
 nosave int hdwimp_womp_selected_colour=0;
 nosave int hdwimp_wimp_colour=16;
 nosave int hdwimp_womp_colour=17;
+nosave bool hdwimp_use_customcolourscheme=false;
+nosave int hdwimp_colourscheme=0;
