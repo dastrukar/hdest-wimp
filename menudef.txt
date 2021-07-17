@@ -2,6 +2,7 @@ OptionValue "WIMPColourSchemes" {
 	0, "\cqFr\cdac\cata\crl"
 	1, "\cdD\cxas\cat"
 	2, "Old\cysch\csool"
+	3, "\ceHi\cxdeo\cjus"
 }
 
 OptionMenu "WIMPOptions" {

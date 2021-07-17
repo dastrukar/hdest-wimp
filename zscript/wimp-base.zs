@@ -114,7 +114,7 @@ class WIMPack : Thinker {
 	// Returns ColIn, ColOut, ColInSel, ColOutSel
 	ui int, int, int, int GetColourScheme() {
 		switch (hdwimp_colourscheme) {
-			case 1: // Dast
+			case 1: // Dast (the original default colour scheme before Fractal came along)
 				return 
 					Font.CR_GREEN,
 					Font.CR_RED,
@@ -122,7 +122,7 @@ class WIMPack : Thinker {
 					Font.CR_FIRE;
 				break;
 
-			case 2: // Oldschool
+			case 2: // Oldschool (based on the old backpack ui colours)
 				return
 					Font.CR_WHITE,
 					Font.CR_DARKBROWN,
@@ -130,7 +130,15 @@ class WIMPack : Thinker {
 					Font.CR_SAPPHIRE;
 				break;
 
-			default: // Fractal
+			case 3: // Hideous (based on the original backpack text colours)
+				return
+					Font.CR_BROWN,
+					Font.CR_WHITE,
+					Font.CR_FIRE,
+					Font.CR_FIRE;
+				break;
+
+			default: // Fractal (a replacement to Dast. made by my friend, fractalyee)
 				return
 					Font.CR_DARKGREEN,
 					Font.CR_DARKRED,
