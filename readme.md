@@ -1,7 +1,7 @@
 ![](https://cdn.discordapp.com/attachments/556402107909931008/865644938607460372/unknown.png)
 
 ## What?
-What's In My Pack? (WIMP) is an addon for [Hideous Destructor](https://codeberg.org/mc776/hideousdestructor) that changes the Backpack's UI, and adds some "viewing modes" that help you look through your backpack.
+What's In My Pack? (WIMP) is an addon for [Hideous Destructor](https://codeberg.org/mc776/hideousdestructor) that changes the Backpack's UI, and adds some "sorting modes" that help you look through your backpack.
 
 WIMP adds three modes to the Backpack.
 - All: The default backpack behaviour, shows all items.
