@@ -174,7 +174,7 @@ class WIMPack : Thinker {
 	bool CheckSwitch(HDPlayerPawn Owner, ItemStorage S) {
 		if (
 			Owner.Player &&
-			Owner.Player.CrouchFactor < 1.0
+			PressingFiremode(Owner)
 		) {
 			bool ChangedMode = false;
 
