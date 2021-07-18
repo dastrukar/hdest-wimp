@@ -43,7 +43,7 @@ extend class WIMPack {
 		int TextHeight = sb.pSmallFont.mFont.GetHeight();
 		int TextPadding = TextHeight / 2;
 		int TextOffset = TextHeight + TextPadding;
-		Vector2 Offset = (0, TextHeight * 6);
+		int DisplayOffset = TextHeight * 6;
 
 		// Get modes
 		string Modes[3];
@@ -119,7 +119,7 @@ extend class WIMPack {
 
 					Vector2 ListOffset = (
 						(hdwimp_ui_type != 0)? 0 : (i == 2)? 10 : 20,
-						BaseOffset + Offset.y + (TextOffset * i)
+						BaseOffset + DisplayOffset + (TextOffset * i)
 					);
 					Vector2 IconOffset = (-30, ListOffset.y);
 					int ListFlag = sb.DI_SCREEN_CENTER;
@@ -170,7 +170,7 @@ extend class WIMPack {
 					bool CenterItem = IconOffset ~== (0, 0);
 					sb.DrawImage(
 						CurItem.Icons[0],
-						(IconOffset.x, BaseOffset + Offset.y + (TextHeight * 2) + IconOffset.y),
+						(IconOffset.x, BaseOffset + DisplayOffset + (TextHeight * 2) + IconOffset.y),
 						sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER,
 						(CenterItem && !CurItem.HaveNone())? 1.0 : 0.6,
 						(CenterItem)? (50, 30) : (30, 20),
@@ -179,7 +179,7 @@ extend class WIMPack {
 				}
 			}
 
-			int OnBackpackOffset = (hdwimp_ui_type == 2)? (Offset.y + 1 + (TextOffset * 4)) : (Offset.y + (TextOffset * 6));
+			int OnBackpackOffset = (hdwimp_ui_type == 2)? (DisplayOffset + 1 + (TextOffset * 4)) : (DisplayOffset + (TextOffset * 6));
 			int OnPersonOffset = TextHeight + OnBackpackOffset;
 
 			// Draw these afterwards, because layering
@@ -187,7 +187,7 @@ extend class WIMPack {
 				// Selected icon
 				sb.DrawImage(
 					SelItem.Icons[0],
-					(-40, BaseOffset + Offset.y + (TextOffset * 2)),
+					(-40, BaseOffset + DisplayOffset + (TextOffset * 2)),
 					sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER,
 					(!SelItem.HaveNone())? 1.0 : 0.8,
 					(50, 30),
@@ -266,7 +266,7 @@ extend class WIMPack {
 		);
 
 		if (ItemCount == 0) {
-			sb.DrawString(sb.pSmallFont, "No items found.", (0, BaseOffset + Offset.y), sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER, Font.CR_DARKGRAY);
+			sb.DrawString(sb.pSmallFont, "No items found.", (0, BaseOffset + DisplayOffset), sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER, Font.CR_DARKGRAY);
 			return;
 		}
 	}
