@@ -5,9 +5,15 @@ OptionValue "WIMPColourSchemes" {
 	3, "\ceHi\cxdeo\cjus"
 }
 
+OptionValue "WIMPUIType" {
+	0, "Icons + List"
+	1, "List"
+}
+
 OptionMenu "WIMPOptions" {
 	Title "WIMP Options"
 
+	Option "Display Style", "hdwimp_ui_type", "WIMPUIType"
 	Option "Colour Scheme", "hdwimp_colourscheme", "WIMPColourSchemes"
 	StaticText " "
 	StaticText "=Custom Colours=", "Gold"
