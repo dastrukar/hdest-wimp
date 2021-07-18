@@ -82,6 +82,7 @@ extend class WIMPack {
 
 		// This is where we draw shit
 		int ItemCount = (UseWIMP)? WIS.Items.Size() : Storage.Items.Size();
+		int FontColour;
 
 		if (ItemCount != 0) {
 			StorageItem SelItem = (UseWIMP)? WIS.GetSelectedItem() : Storage.GetSelectedItem();
@@ -97,20 +98,7 @@ extend class WIMPack {
 					RealIndex = ItemCount - abs(RealIndex);
 				}
 
-				// Overwrite i?
-				if (ItemCount == 1) {
-					i = 2;
-				}
-
 				StorageItem CurItem = (UseWIMP)? WIS.Items[RealIndex] : Storage.Items[RealIndex];
-				Vector2 ListOffset = (
-					(hdwimp_ui_type != 0)? 0 : (i == 2)? 10 : 20,
-					BaseOffset + Offset.y + (TextOffset * i)
-				);
-				Vector2 IconOffset = (-30, ListOffset.y);
-				int ListFlag = sb.DI_SCREEN_CENTER;
-				ListFlag |= (hdwimp_ui_type == 0)? sb.DI_TEXT_ALIGN_LEFT : sb.DI_TEXT_ALIGN_CENTER;
-
 				int FontColour = ColOut;
 				if (i == 2) {
 					// Is selected
@@ -122,32 +110,81 @@ extend class WIMPack {
 				// Just in case
 				FontColour = Clamp(FontColour, 0, Font.CR_TEAL);
 
-				// Draw list of items
-				// Icons
-				if (i != 2 && hdwimp_ui_type == 0) {
+				if (hdwimp_ui_type < 2) {
+					// WIMP Backpack UI
+					// Overwrite i?
+					if (ItemCount == 1) {
+						i = 2;
+					}
+
+					Vector2 ListOffset = (
+						(hdwimp_ui_type != 0)? 0 : (i == 2)? 10 : 20,
+						BaseOffset + Offset.y + (TextOffset * i)
+					);
+					Vector2 IconOffset = (-30, ListOffset.y);
+					int ListFlag = sb.DI_SCREEN_CENTER;
+					ListFlag |= (hdwimp_ui_type == 0)? sb.DI_TEXT_ALIGN_LEFT : sb.DI_TEXT_ALIGN_CENTER;
+
+					// Draw list of items
+					// Icons
+					if (i != 2 && hdwimp_ui_type == 0) {
+						sb.DrawImage(
+							CurItem.Icons[0],
+							IconOffset,
+							sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER,
+							(!CurItem.HaveNone())? 0.8 : 0.6,
+							(30, 20),
+							getdefaultbytype(CurItem.ItemClass).scale * 2.0
+						);
+					}
+
+					// Text
+					sb.DrawString(
+						sb.pSmallFont,
+						CurItem.NiceName,
+						ListOffset,
+						ListFlag,
+						FontColour
+					);
+				} else {
+					// Vanilla Hideous Destructor Backpack UI
+					vector2 IconOffset = (ItemCount > 1)? (-100, 8) : (0, 0);
+					switch (i) {
+						case 1:
+							IconOffset = (-50, 4);
+							break;
+
+						case 2:
+							IconOffset = (0, 0);
+							break;
+
+						case 3:
+							IconOffset = (50, 4);
+							break;
+
+						case 4:
+							IconOffset = (100, 8);
+							break;
+					}
+
+					bool CenterItem = IconOffset ~== (0, 0);
 					sb.DrawImage(
 						CurItem.Icons[0],
-						IconOffset,
+						(IconOffset.x, BaseOffset + Offset.y + (TextHeight * 2) + IconOffset.y),
 						sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER,
-						(!CurItem.HaveNone())? 0.8 : 0.6,
-						(30, 20),
-						getdefaultbytype(CurItem.ItemClass).scale * 2.0
+						(CenterItem && !CurItem.HaveNone())? 1.0 : 0.6,
+						(CenterItem)? (50, 30) : (30, 20),
+						getdefaultbytype(CurItem.ItemClass).scale * (CenterItem? 4.0 : 3.0)
 					);
 				}
-
-				// Text
-				sb.DrawString(
-					sb.pSmallFont,
-					CurItem.NiceName,
-					ListOffset,
-					ListFlag,
-					FontColour
-				);
 			}
 
+			int OnBackpackOffset = (hdwimp_ui_type == 2)? (Offset.y + 1 + (TextOffset * 4)) : (Offset.y + (TextOffset * 6));
+			int OnPersonOffset = TextHeight + OnBackpackOffset;
+
 			// Draw these afterwards, because layering
-			// Selected icon
 			if (hdwimp_ui_type == 0) {
+				// Selected icon
 				sb.DrawImage(
 					SelItem.Icons[0],
 					(-40, BaseOffset + Offset.y + (TextOffset * 2)),
@@ -156,6 +193,15 @@ extend class WIMPack {
 					(50, 30),
 					getdefaultbytype(SelItem.ItemClass).scale * 3.0
 				);
+			} else if (hdwimp_ui_type == 2) {
+				// Vanilla backpack item name
+				sb.DrawString(
+					sb.pSmallFont,
+					SelItem.NiceName,
+					(0, BaseOffset + OnBackpackOffset - 1 - TextOffset),
+					sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER,
+					(SelItem.HaveNone())? ColOutSel : ColInSel
+				);
 			}
 
 			// Amount
@@ -163,7 +209,7 @@ extend class WIMPack {
 			sb.DrawString(
 				sb.pSmallFont,
 				"In backpack:  "..sb.FormatNumber(AmountInBackpack, 1, 6),
-				(0, BaseOffset + Offset.y + (TextOffset * 6)),
+				(0, BaseOffset + OnBackpackOffset),
 				sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER,
 				(AmountInBackpack > 0)? Font.CR_BROWN : Font.CR_DARKBROWN
 			);
@@ -172,7 +218,7 @@ extend class WIMPack {
 			sb.DrawString(
 				sb.pSmallFont,
 				"On person:  "..sb.FormatNumber(AmountOnPerson, 1, 6),
-				(0, BaseOffset + TextHeight + Offset.y + (TextOffset * 6)),
+				(0, BaseOffset + OnPersonOffset),
 				sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER,
 				(AmountOnPerson > 0)?  Font.CR_WHITE : Font.CR_DARKGRAY
 			);

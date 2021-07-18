@@ -8,6 +8,7 @@ OptionValue "WIMPColourSchemes" {
 OptionValue "WIMPUIType" {
 	0, "Icons + List"
 	1, "List"
+	2, "Vanilla"
 }
 
 OptionMenu "WIMPOptions" {
