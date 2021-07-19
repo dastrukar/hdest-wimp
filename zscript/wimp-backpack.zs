@@ -46,7 +46,10 @@ class WIMPHDBackpack : HDBackpack replaces HDBackpack {
 					return;
 				}
 
-				if (!W.HijackMouseInput(Owner, S)) {
+				if (W.HijackMouseInput(Owner, S)) {
+					Invoker.RepeatTics--;
+					A_UpdateStorage();
+				} else {
 					A_BPReady();
 				}
 				W.SyncStorage(S);
