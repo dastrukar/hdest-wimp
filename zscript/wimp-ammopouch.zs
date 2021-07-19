@@ -40,6 +40,11 @@ class WIMP_AmmoPouch : UaS_AmmoPouch replaces UaS_AmmoPouch {
 				ItemStorage S = Invoker.Storage;
 				WIMPack W = Invoker.WP;
 				HDPlayerPawn Owner = HDPlayerPawn(Invoker.Owner);
+				if (!Owner.Player) {
+					return;
+				}
+				W.GetCVars(Owner.Player);
+
 				if (W.CheckSwitch(Owner, S)) {
 					return;
 				}

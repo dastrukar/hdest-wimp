@@ -42,6 +42,11 @@ class WIMPHDBackpack : HDBackpack replaces HDBackpack {
 				ItemStorage S = Invoker.Storage;
 				WIMPack W = Invoker.WP;
 				HDPlayerPawn Owner = HDPlayerPawn(Invoker.Owner);
+				if (!Owner.Player) {
+					return;
+				}
+				W.GetCVars(Owner.Player);
+
 				if (W.CheckSwitch(Owner, S)) {
 					return;
 				}

@@ -8,7 +8,7 @@ nosave int hdwimp_colourscheme=0;
 
 nosave int hdwimp_ui_type=0;
 
-nosave bool hdwimp_invert_item_cycling=false;
-nosave bool hdwimp_invert_mode_cycling=false;
-nosave bool hdwimp_invert_scrolling=false;
-nosave int hdwimp_scrolling_sensitivity=5;
+user bool hdwimp_invert_item_cycling=false;
+user bool hdwimp_invert_mode_cycling=false;
+user bool hdwimp_invert_scrolling=false;
+user int hdwimp_scrolling_sensitivity=5;

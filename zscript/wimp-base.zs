@@ -96,6 +96,12 @@ class WIMPack play {
 	WIMPItemStorage WIMP;
 	WOMPItemStorage WOMP;
 
+	//CVars
+	transient bool InvertItemCycling;
+	transient bool InvertModeCycling;
+	transient bool InvertScrolling;
+	transient int ScrollingInSens;
+
 	// Some stuff from HDBackpack's code
 	clearscope int GetAmountOnPerson(Inventory Item) {
 		let wpn = HDWeapon(item);
@@ -121,11 +127,19 @@ class WIMPack play {
 		}
 
 		double Pitch = Owner.Player.cmd.Pitch;
-		if (hdwimp_invert_scrolling) {
+		if (InvertScrolling) {
 			Pitch = Pitch * -1;
 		}
 
 		return Pitch;
+	}
+
+	// Can't use nosave on stuff in non-ui context due to desyncs
+	void GetCVars(PlayerInfo Player) {
+		InvertItemCycling = CVar.GetCVar("hdwimp_invert_item_cycling", Player).GetBool();
+		InvertModeCycling = CVar.GetCVar("hdwimp_invert_mode_cycling", Player).GetBool();
+		InvertScrolling = CVar.GetCVar("hdwimp_invert_scrolling", Player).GetBool();
+		ScrollingInSens = CVar.GetCVar("hdwimp_scrolling_sensitivity", Player).GetInt();
 	}
 
 	// Helps make sure you stay on the correct index when switching between modes
@@ -174,17 +188,15 @@ class WIMPack play {
 
 		if (PressingFiremode(Owner)) {
 			int InputAmount = GetMouseY(Owner, true);
-			if (InputAmount < -hdwimp_scrolling_sensitivity) {
+			if (InputAmount < -ScrollingInSens) {
 				WIS.PrevItem();
-			} else if (InputAmount > hdwimp_scrolling_sensitivity) {
+			} else if (InputAmount > ScrollingInSens) {
 				WIS.NextItem();
 			}
 		} else {
-			bool Invert = hdwimp_invert_item_cycling;
-
-			if (JustPressed(Owner, GetCycleInput(true, Invert))) {
+			if (JustPressed(Owner, GetCycleInput(true, InvertItemCycling))) {
 				WIS.PrevItem();
-			} else if (JustPressed(Owner, GetCycleInput(false, Invert))) {
+			} else if (JustPressed(Owner, GetCycleInput(false, InvertItemCycling))) {
 				WIS.NextItem();
 			}
 		}
@@ -201,20 +213,18 @@ class WIMPack play {
 
 		if (PressingFiremode(Owner)) {
 			int InputAmount = GetMouseY(Owner, true);
-			if (InputAmount < -hdwimp_scrolling_sensitivity) {
+			if (InputAmount < -ScrollingInSens) {
 				S.PrevItem();
-			} else if (InputAmount > hdwimp_scrolling_sensitivity) {
+			} else if (InputAmount > ScrollingInSens) {
 				S.NextItem();
 			}
 
 			IgnoreBPReady = true;
 		} else {
-			bool Invert = hdwimp_invert_item_cycling;
-
-			if (JustPressed(Owner, GetCycleInput(true, Invert))) {
+			if (JustPressed(Owner, GetCycleInput(true, InvertItemCycling))) {
 				IgnoreBPReady = true;
 				S.PrevItem();
-			} else if (JustPressed(Owner, GetCycleInput(false, Invert))) {
+			} else if (JustPressed(Owner, GetCycleInput(false, InvertItemCycling))) {
 				IgnoreBPReady = true;
 				S.NextItem();
 			}
@@ -229,12 +239,11 @@ class WIMPack play {
 			PressingFiremode(Owner)
 		) {
 			bool ChangedMode = false;
-			bool Invert = hdwimp_invert_mode_cycling;
 
-			if (JustPressed(Owner, GetCycleInput(true, Invert))) {
+			if (JustPressed(Owner, GetCycleInput(true, InvertModeCycling))) {
 				SortMode--;
 				ChangedMode = true;
-			} else if (JustPressed(Owner, GetCycleInput(false, Invert))) {
+			} else if (JustPressed(Owner, GetCycleInput(false, InvertModeCycling))) {
 				SortMode++;
 				ChangedMode = true;
 			}
