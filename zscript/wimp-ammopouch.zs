@@ -44,7 +44,9 @@ class WIMP_AmmoPouch : UaS_AmmoPouch replaces UaS_AmmoPouch {
 					return;
 				}
 
-				A_BPReady();
+				if (!W.HijackMouseInput(Owner, S)) {
+					A_BPReady();
+				}
 				W.SyncStorage(S);
 
 				switch (W.SortMode) {
