@@ -142,24 +142,30 @@ class WIMPack : Thinker {
 
 	void DoWIMP(HDPlayerPawn Owner, ItemStorage S) {
 		WIMP.UpdateStorage(S);
-		HijackMouseInput(Owner, WIMP);
+		WIMPHijackMouseInput(Owner, WIMP);
 	}
 
 	void DoWOMP(HDPlayerPawn Owner, ItemStorage S) {
 		WOMP.UpdateStorage(S);
-		HijackMouseInput(Owner, WOMP);
+		WIMPHijackMouseInput(Owner, WOMP);
 	}
 
-	void HijackMouseInput(HDPlayerPawn Owner, WIMPItemStorage WIS) {
+	void WIMPHijackMouseInput(HDPlayerPawn Owner, WIMPItemStorage WIS) {
 		if (WIS.Items.Size() < 1) {
 			return;
 		}
 
 		if (PressingFiremode(Owner)) {
 			int InputAmount = GetMouseY(Owner, true);
-			if (InputAmount < -5) {
+			if (
+				(InputAmount > 5 && hdwimp_invert_scrolling) ||
+				(InputAmount < -5 && !hdwimp_invert_scrolling)
+			) {
 				WIS.PrevItem();
-			} else if (InputAmount > 5) {
+			} else if (
+				(InputAmount < -5 && hdwimp_invert_scrolling) ||
+				(InputAmount > 5 && !hdwimp_invert_scrolling)
+			) {
 				WIS.NextItem();
 			}
 		} else {
@@ -169,6 +175,31 @@ class WIMPack : Thinker {
 				WIS.NextItem();
 			}
 		}
+	}
+
+	// This is a bool for skipping A_BPReady
+	bool HijackMouseInput(HDPlayerPawn Owner, ItemStorage S) {
+		if (S.Items.Size() < 1) {
+			return false;
+		}
+
+		if (PressingFiremode(Owner)) {
+			int InputAmount = GetMouseY(Owner, true);
+			if (
+				(InputAmount > 5 && hdwimp_invert_scrolling) ||
+				(InputAmount < -5 && !hdwimp_invert_scrolling)
+			) {
+				S.PrevItem();
+			} else if (
+				(InputAmount < -5 && hdwimp_invert_scrolling) ||
+				(InputAmount > 5 && !hdwimp_invert_scrolling)
+			) {
+				S.NextItem();
+			}
+
+			return true;
+		}
+		return false;
 	}
 
 	bool CheckSwitch(HDPlayerPawn Owner, ItemStorage S) {

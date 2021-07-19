@@ -15,6 +15,7 @@ OptionMenu "WIMPOptions" {
 	Title "WIMP Options"
 
 	Option "Display Style", "hdwimp_ui_type", "WIMPUIType"
+	Option "Invert scrolling", "hdwimp_invert_scrolling", "YesNo"
 	Option "Colour Scheme", "hdwimp_colourscheme", "WIMPColourSchemes"
 	StaticText " "
 	StaticText "=Custom Colours=", "Gold"

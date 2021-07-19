@@ -46,7 +46,9 @@ class WIMPHDBackpack : HDBackpack replaces HDBackpack {
 					return;
 				}
 
-				A_BPReady();
+				if (!W.HijackMouseInput(Owner, S)) {
+					A_BPReady();
+				}
 				W.SyncStorage(S);
 
 				switch (W.SortMode) {
