@@ -9,3 +9,4 @@ nosave int hdwimp_colourscheme=0;
 nosave int hdwimp_ui_type=0;
 
 nosave bool hdwimp_invert_scrolling=false;
+nosave int hdwimp_scrolling_sensitivity=5;

@@ -158,13 +158,23 @@ class WIMPack : Thinker {
 		if (PressingFiremode(Owner)) {
 			int InputAmount = GetMouseY(Owner, true);
 			if (
-				(InputAmount > 5 && hdwimp_invert_scrolling) ||
-				(InputAmount < -5 && !hdwimp_invert_scrolling)
+				(
+					InputAmount > hdwimp_scrolling_sensitivity &&
+					hdwimp_invert_scrolling
+				) || (
+					InputAmount < -hdwimp_scrolling_sensitivity &&
+					!hdwimp_invert_scrolling
+				)
 			) {
 				WIS.PrevItem();
 			} else if (
-				(InputAmount < -5 && hdwimp_invert_scrolling) ||
-				(InputAmount > 5 && !hdwimp_invert_scrolling)
+				(
+					InputAmount < -hdwimp_scrolling_sensitivity &&
+					hdwimp_invert_scrolling
+				) || (
+					InputAmount > hdwimp_scrolling_sensitivity &&
+					!hdwimp_invert_scrolling
+				)
 			) {
 				WIS.NextItem();
 			}
@@ -186,13 +196,23 @@ class WIMPack : Thinker {
 		if (PressingFiremode(Owner)) {
 			int InputAmount = GetMouseY(Owner, true);
 			if (
-				(InputAmount > 5 && hdwimp_invert_scrolling) ||
-				(InputAmount < -5 && !hdwimp_invert_scrolling)
+				(
+					InputAmount > hdwimp_scrolling_sensitivity &&
+					hdwimp_invert_scrolling
+				) || (
+					InputAmount < -hdwimp_scrolling_sensitivity &&
+					!hdwimp_invert_scrolling
+				)
 			) {
 				S.PrevItem();
 			} else if (
-				(InputAmount < -5 && hdwimp_invert_scrolling) ||
-				(InputAmount > 5 && !hdwimp_invert_scrolling)
+				(
+					InputAmount < -hdwimp_scrolling_sensitivity &&
+					hdwimp_invert_scrolling
+				) || (
+					InputAmount > hdwimp_scrolling_sensitivity &&
+					!hdwimp_invert_scrolling
+				)
 			) {
 				S.NextItem();
 			}
