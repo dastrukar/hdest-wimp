@@ -87,7 +87,7 @@ class WOMPItemStorage : WIMPItemStorage {
 	}
 }
 
-class WIMPack : Thinker {
+class WIMPack play {
 	// 0 - All: Shows all items
 	// 1 - WIMP(What's In My Pack): Shows items in backpack
 	// 2 - WOMP(What's Outside My Pack): Does the opposite of WIMP
