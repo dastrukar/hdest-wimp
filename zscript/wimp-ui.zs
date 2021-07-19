@@ -118,34 +118,35 @@ extend class WIMPack {
 					}
 
 					Vector2 ListOffset = (
-						(hdwimp_ui_type != 0)? 0 : (i == 2)? 10 : 20,
+						(hdwimp_ui_type != 0)? 0 : 20,
 						BaseOffset + DisplayOffset + (TextOffset * i)
 					);
 					Vector2 IconOffset = (-30, ListOffset.y);
-					int ListFlag = sb.DI_SCREEN_CENTER;
-					ListFlag |= (hdwimp_ui_type == 0)? sb.DI_TEXT_ALIGN_LEFT : sb.DI_TEXT_ALIGN_CENTER;
+					int ListFlag = (hdwimp_ui_type == 0)? sb.DI_TEXT_ALIGN_LEFT : sb.DI_TEXT_ALIGN_CENTER;
 
 					// Draw list of items
 					// Icons
-					if (i != 2 && hdwimp_ui_type == 0) {
-						sb.DrawImage(
-							CurItem.Icons[0],
-							IconOffset,
-							sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER,
-							(!CurItem.HaveNone())? 0.8 : 0.6,
-							(30, 20),
-							getdefaultbytype(CurItem.ItemClass).scale * 2.0
+					if (i != 2) {
+						if (hdwimp_ui_type == 0) {
+							sb.DrawImage(
+								CurItem.Icons[0],
+								IconOffset,
+								sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER,
+								(!CurItem.HaveNone())? 0.8 : 0.6,
+								(30, 20),
+								getdefaultbytype(CurItem.ItemClass).scale * 2.0
+							);
+						}
+
+						// Text
+						sb.DrawString(
+							sb.pSmallFont,
+							CurItem.NiceName,
+							ListOffset,
+							sb.DI_SCREEN_CENTER | ListFlag,
+							FontColour
 						);
 					}
-
-					// Text
-					sb.DrawString(
-						sb.pSmallFont,
-						CurItem.NiceName,
-						ListOffset,
-						ListFlag,
-						FontColour
-					);
 				} else {
 					// Vanilla Hideous Destructor Backpack UI
 					vector2 IconOffset = (ItemCount > 1)? (-100, 8) : (0, 0);
@@ -193,16 +194,21 @@ extend class WIMPack {
 					(50, 30),
 					getdefaultbytype(SelItem.ItemClass).scale * 3.0
 				);
-			} else if (hdwimp_ui_type == 2) {
-				// Vanilla backpack item name
-				sb.DrawString(
-					sb.pSmallFont,
-					SelItem.NiceName,
-					(0, BaseOffset + OnBackpackOffset - 1 - TextOffset),
-					sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER,
-					(SelItem.HaveNone())? ColOutSel : ColInSel
-				);
 			}
+
+			Vector2 SelectedOffset = (
+				(hdwimp_ui_type != 0)? 0 : 10,
+				BaseOffset + ((hdwimp_ui_type > 1)? (OnBackpackOffset - 1 - TextOffset) : (DisplayOffset + (TextOffset * 2)))
+			);
+			int SelectedFlag = (hdwimp_ui_type == 0)? sb.DI_TEXT_ALIGN_LEFT : sb.DI_TEXT_ALIGN_CENTER;
+			// Selected item name
+			sb.DrawString(
+				sb.pSmallFont,
+				SelItem.NiceName,
+				SelectedOffset,
+				sb.DI_SCREEN_CENTER | SelectedFlag,
+				(SelItem.HaveNone())? ColOutSel : ColInSel
+			);
 
 			// Amount
 			int AmountInBackpack = (SelItem.ItemClass is 'HDMagAmmo')? SelItem.Amounts.Size() : ((SelItem.Amounts.Size() > 0)? SelItem.Amounts[0] : 0);
