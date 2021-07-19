@@ -100,10 +100,7 @@ extend class WIMPack {
 
 				StorageItem CurItem = (UseWIMP)? WIS.Items[RealIndex] : Storage.Items[RealIndex];
 				int FontColour = ColOut;
-				if (i == 2) {
-					// Is selected
-					FontColour = (SelItem.HaveNone())? ColOutSel : ColInSel;
-				} else if (CurItem.Amounts.Size() > 0) {
+				if (CurItem.Amounts.Size() > 0) {
 					// In backpack
 					FontColour = ColIn;
 				}
