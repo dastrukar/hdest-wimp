@@ -115,6 +115,10 @@ class WIMPack play {
 		return Owner.Player.cmd.Buttons & BT_USER2;
 	}
 
+	bool PressingZoom(HDPlayerPawn Owner) {
+		return Owner.Player.cmd.Buttons & BT_ZOOM;
+	}
+
 	bool JustPressed(HDPlayerPawn Owner, int whichbutton) {
 		return(
 			Owner.Player.cmd.Buttons & whichbutton &&
@@ -242,7 +246,7 @@ class WIMPack play {
 	bool CheckSwitch(HDPlayerPawn Owner, ItemStorage S) {
 		if (
 			Owner.Player &&
-			PressingFiremode(Owner)
+			PressingZoom(Owner)
 		) {
 			bool ChangedMode = false;
 
