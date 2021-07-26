@@ -99,10 +99,10 @@ extend class WIMPack {
 				}
 
 				StorageItem CurItem = (UseWIMP)? WIS.Items[RealIndex] : Storage.Items[RealIndex];
-				int FontColour = ColOut;
-				if (CurItem.Amounts.Size() > 0) {
-					// In backpack
-					FontColour = ColIn;
+				int FontColour = ColIn;
+				if (CurItem.HaveNone()) {
+					// Not in backpack
+					FontColour = ColOut;
 				}
 				// Just in case
 				FontColour = Clamp(FontColour, 0, Font.CR_TEAL);
