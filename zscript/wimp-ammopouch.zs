@@ -35,6 +35,19 @@ class WIMP_AmmoPouch : UaS_AmmoPouch replaces UaS_AmmoPouch {
 	}
 
 	States {
+		Select0:
+			// Initialize shit to (try) prevent reading from address zero
+			TNT1 A 10 {
+				A_UpdateStorage();
+				Invoker.WP.SyncStorage(invoker.Storage);
+				A_StartSound("weapons/pocket", CHAN_WEAPON);
+				if (invoker.Storage.TotalBulk > (HDBPC_CAPACITY * 0.7)) {
+					A_SetTics(20);
+				}
+			}
+			TNT1 A 0 A_Raise(999);
+			Wait;
+
 		Ready:
 			TNT1 A 1 {
 				ItemStorage S = Invoker.Storage;
