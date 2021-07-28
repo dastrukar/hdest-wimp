@@ -63,7 +63,6 @@ class WIMP_AmmoPouch : UaS_AmmoPouch replaces UaS_AmmoPouch {
 				}
 
 				if (W.HijackMouseInput(Owner, S)) {
-					Invoker.RepeatTics--;
 					A_UpdateStorage();
 				} else {
 					A_BPReady();
