@@ -8,3 +8,4 @@ version 4.6.0
 // Items
 #include "zscript/wimp-backpack.zs"
 #include "zscript/wimp-ammopouch.zs"
+#include "zscript/wimp-dsd.zs"

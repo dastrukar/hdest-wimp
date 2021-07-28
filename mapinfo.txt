@@ -1,4 +1,5 @@
 GameInfo {
 	AddEventHandlers = "HDBackpackReplacer"
 	AddEventHandlers = "UaS_AmmoPouch_Replacer"
+	AddEventHandlers = "WIMP_DSDHandler"
 }
