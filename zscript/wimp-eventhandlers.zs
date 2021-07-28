@@ -3,4 +3,3 @@
 
 class HDBackpackReplacer : EventHandler {}
 class UaS_AmmoPouch_Replacer : EventHandler {}
-class WIMP_DSDHandler : EventHandler {}
