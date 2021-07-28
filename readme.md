@@ -15,7 +15,9 @@ Don't like the colours and new layout? Don't worry, you can change them in `WIMP
 ## Versions
 | Branch | Addons supported (and required) |
 | --- | --- |
-| [`master`](https://github.com/dastrukar/hdest-wimp/archive/refs/heads/master.zip) | Ugly as Sin |
+| [`master`](https://github.com/dastrukar/hdest-wimp/archive/refs/heads/master.zip) | Ugly as Sin, DSD |
+| [`uas`](https://github.com/dastrukar/hdest-wimp/archive/refs/heads/uas.zip) | Ugly as Sin |
+| [`dsd`](https://github.com/dastrukar/hdest-wimp/archive/refs/heads/dsd.zip) | DSD |
 | [`vanilla`](https://github.com/dastrukar/hdest-wimp/archive/refs/heads/vanilla.zip) | none |
 
 ## Other info
