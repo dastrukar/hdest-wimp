@@ -91,6 +91,20 @@ class WIMP_DSDInterface : DSDInterface replaces DSDInterface {
 		}
 	}
 
+	// Need to override this, else you can't upgrade your DSD
+	override void ActualPickup(Actor other, bool silent) {
+		let DSD = WIMP_DSDInterface(other.FindInventory("WIMP_DSDInterface"));
+		if (DSD && DSD.Storage) {
+			other.A_StartSound("weapons/pocket");
+			other.A_Log("Your storage has expanded.", true);
+			DSD.Storage.MaxBulk += 1000;
+			Destroy();
+			return;
+		}
+
+		Super.ActualPickup(other, silent);
+	}
+
 	// Because A_BPReady isn't really used
 	action void A_DSDReady() {
 		if (PressingFiremode()) {
