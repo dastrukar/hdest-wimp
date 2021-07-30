@@ -62,22 +62,15 @@ class WIMP_AmmoPouch : UaS_AmmoPouch replaces UaS_AmmoPouch {
 					return;
 				}
 
-				if (W.HijackMouseInput(Owner, S)) {
+				if (
+					W.HandleWIMP(Owner, S) ||
+					W.HijackMouseInput(Owner, S)
+				) {
 					A_UpdateStorage();
 				} else {
 					A_BPReady();
 				}
 				W.SyncStorage(S);
-
-				switch (W.SortMode) {
-					case 1:
-						W.DoWIMP(Owner, S);
-						break;
-
-					case 2:
-						W.DoWOMP(Owner, S);
-						break;
-				}
 			}
 			Goto ReadyEnd;
 	}

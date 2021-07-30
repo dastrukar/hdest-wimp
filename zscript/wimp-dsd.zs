@@ -127,7 +127,10 @@ class WIMP_DSDInterface : DSDInterface replaces DSDInterface {
 				}
 			}
 
-			if (Invoker.WP.HijackMouseInput(HDPlayerPawn(Invoker.Owner), Invoker.Storage)) {
+			if (
+				Invoker.WP.HandleWIMP(HDPlayerPawn(Invoker.Owner), Invoker.Storage) ||
+				Invoker.WP.HijackMouseInput(HDPlayerPawn(Invoker.Owner), Invoker.Storage)
+			) {
 				A_UpdateStorage();
 			}
 		}
@@ -161,16 +164,6 @@ class WIMP_DSDInterface : DSDInterface replaces DSDInterface {
 
 				A_DSDReady();
 				W.SyncStorage(S);
-
-				switch (W.SortMode) {
-					case 1:
-						W.DoWIMP(Owner, S);
-						break;
-
-					case 2:
-						W.DoWOMP(Owner, S);
-						break;
-				}
 			}
 			Goto ReadyEnd;
 	}

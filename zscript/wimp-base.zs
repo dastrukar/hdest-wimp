@@ -168,6 +168,17 @@ class WIMPack play {
 		}
 	}
 
+	bool HandleWIMP(HDPlayerPawn Owner, ItemStorage S) {
+		switch (SortMode) {
+			case 1:
+				return DoWIMP(Owner, S);
+
+			case 2:
+				return DoWOMP(Owner, S);
+		}
+		return false;
+	}
+
 	bool DoWIMP(HDPlayerPawn Owner, ItemStorage S) {
 		WIMP.UpdateStorage(S);
 		return WIMPHijackMouseInput(Owner, WIMP);
