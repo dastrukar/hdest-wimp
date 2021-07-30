@@ -4,13 +4,13 @@ class WIMP_DSDHandler : DSDHandler {
 
 		if (
 			T &&
-			T.GetClassName() == "WIMP_DSDInterface" &&
+			T.GetClassName() == "DSDInterface" &&
 			HDBackpack(T).Owner
 		) {
 			HDBackpack hdb = HDBackpack(T);
 			hdb.Owner.GiveInventory("WIMP_DSDInterface", 1);
 
-			WIMPHDBackpack wimp = WIMPHDBackpack(hdb.Owner.FindInventory("WIMP_DSDInterface"));
+			WIMP_DSDInterface wimp = WIMP_DSDInterface(hdb.Owner.FindInventory("WIMP_DSDInterface"));
 			wimp.Storage = hdb.Storage;
 			wimp.MaxCapacity = hdb.MaxCapacity;
 
