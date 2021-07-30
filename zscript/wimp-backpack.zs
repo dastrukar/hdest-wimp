@@ -10,9 +10,20 @@ extend class HDBackpackReplacer {
 			HDBackpack(T).Owner
 		) {
 			HDBackpack hdb = HDBackpack(T);
-			hdb.Owner.GiveInventory("WIMPHDBackpack", 1);
+			WIMPHDBackpack wimp;
 
-			WIMPHDBackpack wimp = WIMPHDBackpack(hdb.Owner.FindInventory("WIMPHDBackpack"));
+			// Already has a backpack?
+			if (hdb.Owner.FindInventory("WIMPHDBackpack")) {
+				wimp = WIMPHDBackpack(Actor.Spawn("WIMPHDBackpack", hdb.Owner.pos));
+
+				wimp.angle = hdb.owner.angle;
+				wimp.A_ChangeVelocity(1.5, 0, 1, CVF_RELATIVE);
+				wimp.vel += hdb.owner.vel;
+			} else {
+				hdb.Owner.GiveInventory("WIMPHDBackpack", 1);
+				wimp = WIMPHDBackpack(hdb.Owner.FindInventory("WIMPHDBackpack"));
+			}
+
 			wimp.Storage = hdb.Storage;
 			wimp.MaxCapacity = hdb.MaxCapacity;
 
