@@ -168,14 +168,14 @@ class WIMPack play {
 		}
 	}
 
-	void DoWIMP(HDPlayerPawn Owner, ItemStorage S) {
+	bool DoWIMP(HDPlayerPawn Owner, ItemStorage S) {
 		WIMP.UpdateStorage(S);
-		WIMPHijackMouseInput(Owner, WIMP);
+		return WIMPHijackMouseInput(Owner, WIMP);
 	}
 
-	void DoWOMP(HDPlayerPawn Owner, ItemStorage S) {
+	bool DoWOMP(HDPlayerPawn Owner, ItemStorage S) {
 		WOMP.UpdateStorage(S);
-		WIMPHijackMouseInput(Owner, WOMP);
+		return WIMPHijackMouseInput(Owner, WOMP);
 	}
 
 	// Returns the input used for cycling through items
@@ -187,10 +187,12 @@ class WIMPack play {
 		}
 	}
 
-	void WIMPHijackMouseInput(HDPlayerPawn Owner, WIMPItemStorage WIS) {
+	bool WIMPHijackMouseInput(HDPlayerPawn Owner, WIMPItemStorage WIS) {
 		if (WIS.Items.Size() < 1) {
-			return;
+			return false;
 		}
+
+		bool IgnoreBPReady = false;
 
 		if (PressingFiremode(Owner) && !DisableScrolling) {
 			int InputAmount = GetMouseY(Owner, true);
@@ -199,13 +201,19 @@ class WIMPack play {
 			} else if (InputAmount > ScrollingInSens) {
 				WIS.NextItem();
 			}
+
+			IgnoreBPReady = true;
 		} else {
 			if (JustPressed(Owner, GetCycleInput(true, InvertItemCycling))) {
+				IgnoreBPReady = true;
 				WIS.PrevItem();
 			} else if (JustPressed(Owner, GetCycleInput(false, InvertItemCycling))) {
+				IgnoreBPReady = true;
 				WIS.NextItem();
 			}
 		}
+
+		return IgnoreBPReady;
 	}
 
 	// This is a bool for skipping A_BPReady

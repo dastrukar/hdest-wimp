@@ -36,6 +36,20 @@ class WIMPHDBackpack : HDBackpack replaces HDBackpack {
 		WP.DrawHUDStuff(sb, hdw, hpl, Storage, "\c[Tan]Backpack");
 	}
 
+	action bool A_HandleWIMP() {
+		ItemStorage S = Invoker.Storage;
+		WIMPack W = Invoker.WP;
+		HDPlayerPawn Owner = HDPlayerPawn(Invoker.Owner);
+		switch (W.SortMode) {
+			case 1:
+				return W.DoWIMP(Owner, S);
+
+			case 2:
+				return W.DoWOMP(Owner, S);
+		}
+		return false;
+	}
+
 	States {
 		Select0:
 			// Initialize shit to (try) prevent reading from address zero
@@ -64,22 +78,16 @@ class WIMPHDBackpack : HDBackpack replaces HDBackpack {
 					return;
 				}
 
-				if (W.HijackMouseInput(Owner, S)) {
+				if (
+					A_HandleWIMP() ||
+					W.HijackMouseInput(Owner, S)
+				) {
 					A_UpdateStorage();
 				} else {
 					A_BPReady();
 				}
+
 				W.SyncStorage(S);
-
-				switch (W.SortMode) {
-					case 1:
-						W.DoWIMP(Owner, S);
-						break;
-
-					case 2:
-						W.DoWOMP(Owner, S);
-						break;
-				}
 			}
 			Goto ReadyEnd;
 	}
