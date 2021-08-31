@@ -8,7 +8,7 @@ WIMP adds three modes to the Backpack.
 - WIMP: Shows items in backpack.
 - WOMP: Does the opposite of WIMP.
 
-You can switch between modes by holding `Firemode` and pressing either `Fire` or `AltFire` to cycle left and right respectively.
+You can switch between modes by holding `Zoom` and pressing either `Fire` or `AltFire` to cycle left and right respectively.
 
 Don't like the colours and new layout? Don't worry, you can change them in `WIMP Options`.
 
