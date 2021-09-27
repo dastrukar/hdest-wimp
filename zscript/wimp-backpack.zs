@@ -54,7 +54,7 @@ class WIMPHDBackpack : HDBackpack replaces HDBackpack {
 				A_UpdateStorage();
 				Invoker.WP.SyncStorage(invoker.Storage);
 				A_StartSound("weapons/pocket", CHAN_WEAPON);
-				if (invoker.Storage.TotalBulk > (HDBPC_CAPACITY * 0.7)) {
+				if (invoker.Storage.TotalBulk > (HDCONST_BPMAX * 0.7)) {
 					A_SetTics(20);
 				}
 			}
