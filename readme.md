@@ -12,13 +12,9 @@ You can switch between modes by holding `Zoom` and pressing either `Fire` or `Al
 
 Don't like the colours and new layout? Don't worry, you can change them in `WIMP Options`.
 
-## Versions
-| Branch | Addons supported (and required) |
-| --- | --- |
-| [`master`](https://github.com/dastrukar/hdest-wimp/archive/refs/heads/master.zip) | Ugly as Sin, DSD |
-| [`uas`](https://github.com/dastrukar/hdest-wimp/archive/refs/heads/uas.zip) | Ugly as Sin |
-| [`dsd`](https://github.com/dastrukar/hdest-wimp/archive/refs/heads/dsd.zip) | DSD |
-| [`vanilla`](https://github.com/dastrukar/hdest-wimp/archive/refs/heads/vanilla.zip) | none |
+## Patches
+Inside the folder named [`wimp-patches`](wimp-patches), you'll find some patches I made for other addons that adds new backpacks.   
+While you don't have to use them, they do make the new backpacks use WIMP's UI.
 
 ## Other info
 ### Acronyms
