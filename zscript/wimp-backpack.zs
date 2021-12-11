@@ -1,6 +1,6 @@
 // The backpack from vanilla HDest
 
-class HDBackpackReplacer {
+class HDBackpackReplacer : EventHandler {
 	override void WorldThingSpawned(WorldEvent e) {
 		let T = e.Thing;
 

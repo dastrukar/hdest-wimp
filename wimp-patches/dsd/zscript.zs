@@ -1,3 +1,5 @@
+version 4.6.0
+
 class WIMP_DSDHandler : DSDHandler {
 	override void WorldThingSpawned(WorldEvent e) {
 		let T = e.Thing;

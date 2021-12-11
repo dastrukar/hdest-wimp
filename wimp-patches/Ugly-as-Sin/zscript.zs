@@ -1,3 +1,5 @@
+version 4.6.0
+
 class UaS_AmmoPouch_Replacer : EventHandler {
 	override void WorldThingSpawned(WorldEvent e) {
 		let T = e.Thing;
