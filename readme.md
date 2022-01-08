@@ -16,6 +16,8 @@ Don't like the colours and new layout? Don't worry, you can change them in `WIMP
 Inside the folder named [`wimp-patches`](wimp-patches), you'll find some patches I made for other addons that adds new backpacks.   
 While you don't have to use them, they do make the new backpacks use WIMP's UI.
 
+If you want an addon to be supported, feel free to make a issue request or let me know about the addon.
+
 ## Other info
 ### Acronyms
 - WIMP: What's In My Pack?
