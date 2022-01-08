@@ -228,7 +228,7 @@ extend class WIMPack {
 		// Header
 		sb.DrawString(
 			sb.pSmallFont,
-			"\c[DarkBrown][] [] [] "..label.."\c[DarkBrown][] [] []",
+			"\c[DarkBrown][] [] [] "..label.." \c[DarkBrown][] [] []",
 			(0, BaseOffset),
 			sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER
 		);
