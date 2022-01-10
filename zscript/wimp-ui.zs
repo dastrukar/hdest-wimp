@@ -41,6 +41,18 @@ extend class WIMPack
 		return 0, 0, 0, 0;
 	}
 
+	ui StorageItem GetStorageItem(WIMPItemStorage W, int index)
+	{
+		int itemCount = W.Items.Size();
+		int itemIndex = (W.SelItemIndex + (index - 2)) % itemCount;
+		if (itemIndex < 0)
+		{
+			itemIndex = itemCount - Abs(itemIndex);
+		}
+
+		return W.Items[itemIndex];
+	}
+
 	ui void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl, ItemStorage storage, string label)
 	{
 		float textHeight = sb.pSmallFont.mFont.GetHeight();
@@ -135,25 +147,18 @@ extend class WIMPack
 		// WOMP List
 		if (WOMP.Items.Size())
 		{
-			int itemCount = WOMP.Items.Size();
-
-			int maxCount = (itemCount > 1)? 5 : 1;
+			int maxCount = (WOMP.Items.Size() > 1)? 5 : 1;
 			float drawOffset = (maxCount == 5)? -(textOffset * 2) : 0;
 
 			for (int i = 0; i < maxCount; ++i)
 			{
-				int drawIndex = (WOMP.SelItemIndex + (i - 2)) % itemCount;
-				if (drawIndex < 0)
-				{
-					drawIndex = itemCount - Abs(drawIndex);
-				}
+				StorageItem curItem = GetStorageItem(WOMP, i);
 
-				StorageItem curItem = WOMP.Items[drawIndex];
 				bool isSelected = (
 					!WIMPMode &&
 					(i == 2 || maxCount == 1)
 				);
-				bool inWIMP = (WIMP.ActualIndex.Find(drawIndex) != WIMP.ActualIndex.Size());
+				bool inWIMP = (WIMP.Items.Find(curItem) != WIMP.ActualIndex.Size());
 				string pointer = (isSelected)? " <" : "";
 				int textColour =
 					(inWIMP)? (isSelected)? wimpColourSelected : wimpColour :
@@ -184,20 +189,13 @@ extend class WIMPack
 		// WIMP List
 		if (WIMP.Items.Size())
 		{
-			int itemCount = WIMP.Items.Size();
-
-			int maxCount = (itemCount > 1)? 5 : 1;
+			int maxCount = (WIMP.Items.Size() > 1)? 5 : 1;
 			float drawOffset = (maxCount == 5)? -(textOffset * 2) : 0;
 
 			for (int i = 0; i < maxCount; ++i)
 			{
-				int drawIndex = (WIMP.SelItemIndex + (i - 2)) % itemCount;
-				if (drawIndex < 0)
-				{
-					drawIndex = itemCount - Abs(drawIndex);
-				}
+				StorageItem curItem = GetStorageItem(WIMP, i);
 
-				StorageItem curItem = WIMP.Items[drawIndex];
 				bool isSelected = (
 					WIMPMode &&
 					(i == 2 || maxCount == 1)
