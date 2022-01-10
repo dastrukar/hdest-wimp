@@ -1,12 +1,55 @@
 // UI hell revamped
 extend class WIMPack
 {
+	// Returns wimpColour, wompColour, wimpColourSelected, wompColourSelected
+	ui int, int, int, int GetColourScheme()
+	{
+		switch (hdwimp_colourscheme)
+		{
+			case 1: // Dast (the original default colour scheme before Fractal came along)
+				return
+					Font.CR_GREEN,
+					Font.CR_RED,
+					Font.CR_FIRE,
+					Font.CR_FIRE;
+				break;
+
+			case 2: // Oldschool (based on the old backpack ui colours)
+				return
+					Font.CR_WHITE,
+					Font.CR_DARKBROWN,
+					Font.CR_SAPPHIRE,
+					Font.CR_SAPPHIRE;
+				break;
+
+			case 3: // Hideous (based on the original backpack text colours)
+				return
+					Font.CR_BROWN,
+					Font.CR_WHITE,
+					Font.CR_FIRE,
+					Font.CR_FIRE;
+				break;
+
+			default: // Fractal (a replacement to Dast. made by my friend, fractalyee)
+				return
+					Font.CR_DARKGREEN,
+					Font.CR_DARKRED,
+					Font.CR_GREEN,
+					Font.CR_RED;
+				break;
+		}
+		return 0, 0, 0, 0;
+	}
+
 	ui void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl, ItemStorage storage, string label)
 	{
 		float textHeight = sb.pSmallFont.mFont.GetHeight();
 		float textPadding = textHeight / 2;
 		float textOffset = textHeight + textPadding;
 		float baseOffset = textOffset * -6;
+
+		int wimpColour, wompColour, wimpColourSelected, wompColourSelected;
+		[wimpColour, wompColour, wimpColourSelected, wompColourSelected] = GetColourScheme();
 
 		// Header
 		sb.DrawString(
@@ -110,8 +153,11 @@ extend class WIMPack
 					!WIMPMode &&
 					(i == 2 || maxCount == 1)
 				);
+				bool inWIMP = (WIMP.ActualIndex.Find(drawIndex) != WIMP.ActualIndex.Size());
 				string pointer = (isSelected)? " <" : "";
-				int textColour = (isSelected)? Font.CR_RED : Font.CR_DARKRED;
+				int textColour =
+					(inWIMP)? (isSelected)? wimpColourSelected : wimpColour :
+					(isSelected)? wompColourSelected : wompColour;
 
 				sb.DrawString(
 					sb.pSmallFont,
@@ -157,7 +203,7 @@ extend class WIMPack
 					(i == 2 || maxCount == 1)
 				);
 				string pointer = (isSelected)? "> " : "";
-				int textColour = (isSelected)? Font.CR_GREEN : Font.CR_DARKGREEN;
+				int textColour = (isSelected)? wimpColourSelected : wimpColour;
 
 				sb.DrawString(
 					sb.pSmallFont,
