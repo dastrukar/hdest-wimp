@@ -53,7 +53,7 @@ extend class WIMPack
 		return W.Items[itemIndex];
 	}
 
-	ui void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl, ItemStorage storage, string label)
+	ui void DrawHUDStuff(HDStatusBar sb, HDPlayerPawn hpl, ItemStorage storage, string label)
 	{
 		float textHeight = sb.pSmallFont.mFont.GetHeight();
 		float textPadding = textHeight / 2;
@@ -179,7 +179,7 @@ extend class WIMPack
 					string itemIcon = curItem.Icons[0];
 					Vector2 itemSize = TexMan.GetScaledSize(TexMan.CheckForTexture(itemIcon));
 					float itemScale = (itemSize.x >= itemSize.y)? 16 / itemSize.x : 16 / itemSize.y;
-					float itemAlpha = (isSelected)? 1.0 : 0.8;
+					float itemAlpha = (isSelected)? 1.0 : 0.5;
 
 					sb.DrawImage(
 						curItem.Icons[0],
@@ -247,7 +247,7 @@ extend class WIMPack
 					string itemIcon = curItem.Icons[0];
 					Vector2 itemSize = TexMan.GetScaledSize(TexMan.CheckForTexture(itemIcon));
 					float itemScale = (itemSize.x >= itemSize.y)? 16 / itemSize.x : 16 / itemSize.y;
-					float itemAlpha = (isSelected)? 1.0 : 0.8;
+					float itemAlpha = (isSelected)? 1.0 : 0.5;
 
 					sb.DrawImage(
 						curItem.Icons[0],

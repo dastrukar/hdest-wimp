@@ -52,7 +52,7 @@ class WIMPHDBackpack : HDBackpack replaces HDBackpack
 
 	override void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl)
 	{
-		WP.DrawHUDStuff(sb, hdw, hpl, Storage, "\c[Tan]Backpack");
+		WP.DrawHUDStuff(sb, hpl, Storage, "\c[Tan]Backpack");
 	}
 
 	States
