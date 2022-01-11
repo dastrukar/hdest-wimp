@@ -274,16 +274,4 @@ class WIMPack play
 		}
 		return false;
 	}
-
-	// Checks if you tried to insert/remove something, used for updating WOMP properly (apparently removing items doesn't call UpdateStorage)
-	bool CheckMoveItem(HDPlayerPawn Owner)
-	{
-		return (
-			Owner.Player.cmd.Buttons & BT_RELOAD &&
-			!(Owner.Player.OldButtons & BT_RELOAD)
-		) || (
-			Owner.Player.cmd.Buttons & BT_USER4 &&
-			!(Owner.Player.OldButtons & BT_USER4)
-		);
-	}
 }

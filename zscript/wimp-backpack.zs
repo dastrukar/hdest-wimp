@@ -82,20 +82,18 @@ class WIMPHDBackpack : HDBackpack replaces HDBackpack
 
 				W.GetCVars(Owner.Player);
 				W.SyncStorage(S);
+				A_UpdateStorage();
 
 				if (W.CheckSwitch(Owner, S)) return;
 
 				if (
+					!(
 					W.HandleWIMP(Owner, S) ||
 					W.HijackMouseInput(Owner, S)
+					)
 				)
 				{
-					A_UpdateStorage();
-				}
-				else
-				{
 					A_BPReady();
-					if (W.CheckMoveItem(Owner)) A_UpdateStorage();
 				}
 			}
 			Goto ReadyEnd;
