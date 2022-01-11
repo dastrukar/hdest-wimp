@@ -1,6 +1,6 @@
 OptionValue "WIMPColourSchemes" {
 	0, "\cqFr\cdac\cgta\crl"
-	1, "\cdD\cxas\cat"
+	1, "\cdD\cxas\cgt"
 	2, "Old\cysch\csool"
 	3, "\ceHi\cxdeo\cjus"
 }
