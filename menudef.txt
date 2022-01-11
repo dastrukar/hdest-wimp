@@ -1,20 +1,14 @@
 OptionValue "WIMPColourSchemes" {
-	0, "\cqFr\cdac\cata\crl"
+	0, "\cqFr\cdac\cgta\crl"
 	1, "\cdD\cxas\cat"
 	2, "Old\cysch\csool"
 	3, "\ceHi\cxdeo\cjus"
 }
 
-OptionValue "WIMPUIType" {
-	0, "Icons + List"
-	1, "List"
-	2, "Vanilla"
-}
-
 OptionMenu "WIMPOptions" {
 	Title "WIMP Options"
 
-	Option "Display Style", "hdwimp_ui_type", "WIMPUIType"
+	Option "Show item icons", "hdwimp_show_icons", "YesNo"
 	Option "Invert item cycling", "hdwimp_invert_item_cycling", "YesNo"
 	Option "Invert mode cycling", "hdwimp_invert_mode_cycling", "YesNo"
 	Option "Invert scrolling", "hdwimp_invert_scrolling", "YesNo"

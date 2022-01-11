@@ -149,6 +149,7 @@ extend class WIMPack
 		{
 			int maxCount = (WOMP.Items.Size() > 1)? 5 : 1;
 			float drawOffset = (maxCount == 5)? -(textOffset * 2) : 0;
+			float gapWidth = SmallFont.GetCharWidth("<");
 
 			for (int i = 0; i < maxCount; ++i)
 			{
@@ -159,18 +160,46 @@ extend class WIMPack
 					(i == 2 || maxCount == 1)
 				);
 				bool inWIMP = (WIMP.Items.Find(curItem) != WIMP.ActualIndex.Size());
-				string pointer = (isSelected)? " <" : "";
+				int selectedOffset = (isSelected)? gapWidth * -2 : 0;
+				selectedOffset -= (hdwimp_show_icons)? 32 : 0;
 				int textColour =
 					(inWIMP)? (isSelected)? wimpColourSelected : wimpColour :
 					(isSelected)? wompColourSelected : wompColour;
 
 				sb.DrawString(
 					sb.pSmallFont,
-					curItem.NiceName..pointer,
-					wompListPos + (0, drawOffset),
+					curItem.NiceName,
+					wompListPos + (selectedOffset, drawOffset),
 					sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_RIGHT,
 					textColour
 				);
+
+				if (hdwimp_show_icons)
+				{
+					string itemIcon = curItem.Icons[0];
+					Vector2 itemSize = TexMan.GetScaledSize(TexMan.CheckForTexture(itemIcon));
+					float itemScale = (itemSize.x >= itemSize.y)? 16 / itemSize.x : 16 / itemSize.y;
+					float itemAlpha = (isSelected)? 1.0 : 0.8;
+
+					sb.DrawImage(
+						curItem.Icons[0],
+						wompListPos + (selectedOffset / 2, drawOffset),
+						sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER,
+						itemAlpha,
+						scale: (itemScale, itemScale)
+					);
+				}
+
+				if (isSelected)
+				{
+					sb.DrawString(
+						sb.pSmallFont,
+						"<",
+						wompListPos + (0, drawOffset),
+						sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_RIGHT,
+						textColour
+					);
+				}
 
 				drawOffset += textOffset;
 			}
@@ -191,6 +220,7 @@ extend class WIMPack
 		{
 			int maxCount = (WIMP.Items.Size() > 1)? 5 : 1;
 			float drawOffset = (maxCount == 5)? -(textOffset * 2) : 0;
+			float gapWidth = SmallFont.GetCharWidth("<");
 
 			for (int i = 0; i < maxCount; ++i)
 			{
@@ -200,16 +230,44 @@ extend class WIMPack
 					WIMPMode &&
 					(i == 2 || maxCount == 1)
 				);
-				string pointer = (isSelected)? "> " : "";
+				int selectedOffset = (isSelected)? gapWidth * 2 : 0;
+				selectedOffset += (hdwimp_show_icons)? 32 : 0;
 				int textColour = (isSelected)? wimpColourSelected : wimpColour;
 
 				sb.DrawString(
 					sb.pSmallFont,
-					pointer..curItem.NiceName,
-					wimpListPos + (0, drawOffset),
+					curItem.NiceName,
+					wimpListPos + (selectedOffset, drawOffset),
 					sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_LEFT,
 					textColour
 				);
+
+				if (hdwimp_show_icons)
+				{
+					string itemIcon = curItem.Icons[0];
+					Vector2 itemSize = TexMan.GetScaledSize(TexMan.CheckForTexture(itemIcon));
+					float itemScale = (itemSize.x >= itemSize.y)? 16 / itemSize.x : 16 / itemSize.y;
+					float itemAlpha = (isSelected)? 1.0 : 0.8;
+
+					sb.DrawImage(
+						curItem.Icons[0],
+						wimpListPos + (selectedOffset / 2, drawOffset),
+						sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER,
+						itemAlpha,
+						scale: (itemScale, itemScale)
+					);
+				}
+
+				if (isSelected)
+				{
+					sb.DrawString(
+						sb.pSmallFont,
+						">",
+						wimpListPos + (0, drawOffset),
+						sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_LEFT,
+						textColour
+					);
+				}
 
 				drawOffset += textOffset;
 			}
