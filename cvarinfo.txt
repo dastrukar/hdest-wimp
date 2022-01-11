@@ -11,5 +11,4 @@ nosave bool hdwimp_show_icons=true;
 user bool hdwimp_invert_item_cycling=false;
 user bool hdwimp_invert_mode_cycling=false;
 user bool hdwimp_invert_scrolling=false;
-user bool hdwimp_disable_scrolling=false;
 user int hdwimp_scrolling_sensitivity=5;

@@ -12,7 +12,6 @@ OptionMenu "WIMPOptions" {
 	Option "Invert item cycling", "hdwimp_invert_item_cycling", "YesNo"
 	Option "Invert mode cycling", "hdwimp_invert_mode_cycling", "YesNo"
 	Option "Invert scrolling", "hdwimp_invert_scrolling", "YesNo"
-	Option "Disable scrolling", "hdwimp_disable_scrolling", "YesNo"
 	Slider "Scrolling insensitivity", "hdwimp_scrolling_sensitivity", 1, 1000, 1
 	Option "Colour Scheme", "hdwimp_colourscheme", "WIMPColourSchemes"
 	StaticText " "

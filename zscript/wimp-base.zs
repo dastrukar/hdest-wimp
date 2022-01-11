@@ -101,7 +101,6 @@ class WIMPack play
 	transient bool InvertItemCycling;
 	transient bool InvertModeCycling;
 	transient bool InvertScrolling;
-	transient bool DisableScrolling;
 	transient int ScrollingInSens;
 
 	// Some stuff from HDBackpack's code
@@ -150,7 +149,6 @@ class WIMPack play
 		InvertItemCycling = CVar.GetCVar("hdwimp_invert_item_cycling", Player).GetBool();
 		InvertModeCycling = CVar.GetCVar("hdwimp_invert_mode_cycling", Player).GetBool();
 		InvertScrolling = CVar.GetCVar("hdwimp_invert_scrolling", Player).GetBool();
-		DisableScrolling = CVar.GetCVar("hdwimp_disable_scrolling", Player).GetBool();
 		ScrollingInSens = CVar.GetCVar("hdwimp_scrolling_sensitivity", Player).GetInt();
 	}
 
@@ -194,7 +192,7 @@ class WIMPack play
 
 		bool ignoreBPReady = false;
 
-		if (PressingFiremode(Owner) && !DisableScrolling)
+		if (PressingFiremode(Owner))
 		{
 			int inputAmount = GetMouseY(Owner, true);
 			if (inputAmount < -ScrollingInSens) WIS.PrevItem();
@@ -227,8 +225,6 @@ class WIMPack play
 
 		if (PressingFiremode(Owner))
 		{
-			if (DisableScrolling) return true;
-
 			int inputAmount = GetMouseY(Owner, true);
 			if (inputAmount < -ScrollingInSens) S.PrevItem();
 			else if (inputAmount > ScrollingInSens) S.NextItem();
