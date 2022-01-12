@@ -117,11 +117,6 @@ class WIMPack play
 		return Owner.Player.cmd.Buttons & BT_USER2;
 	}
 
-	bool PressingZoom(HDPlayerPawn Owner)
-	{
-		return Owner.Player.cmd.Buttons & BT_ZOOM;
-	}
-
 	bool JustPressed(HDPlayerPawn Owner, int whichButton)
 	{
 		return (
@@ -167,8 +162,12 @@ class WIMPack play
 		}
 	}
 
+	// Handle WIMP inputs
 	bool HandleWIMP(HDPlayerPawn Owner, ItemStorage storage)
 	{
+		// Force WIMP mode when dumping
+		if (Owner.Player.cmd.Buttons & BT_ALTRELOAD) WIMPMode = true;
+
 		if (WIMPMode)
 		{
 			return WIMPHijackMouseInput(Owner, WIMP);
