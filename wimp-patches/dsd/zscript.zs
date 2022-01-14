@@ -1,14 +1,17 @@
 version 4.6.0
 
-class WIMP_DSDHandler : DSDHandler {
-	override void WorldThingSpawned(WorldEvent e) {
+class WIMP_DSDHandler : DSDHandler
+{
+	override void WorldThingSpawned(WorldEvent e)
+	{
 		let T = e.Thing;
 
 		if (
 			T &&
 			T.GetClassName() == "DSDInterface" &&
 			HDBackpack(T).Owner
-		) {
+		)
+		{
 			HDBackpack hdb = HDBackpack(T);
 			hdb.Owner.GiveInventory("WIMP_DSDInterface", 1);
 
@@ -20,7 +23,8 @@ class WIMP_DSDHandler : DSDHandler {
 		}
 	}
 
-	override void WorldTick() {
+	override void WorldTick()
+	{
 		// There can only be one.
 		DSDHandler DSDH = DSDHandler(EventHandler.Find("DSDHandler"));
 
@@ -29,24 +33,21 @@ class WIMP_DSDHandler : DSDHandler {
 		}
 	}
 
-	override void NetworkProcess(ConsoleEvent e) {
+	override void NetworkProcess(ConsoleEvent e)
+	{
 		DSDStorage DSD = Storages[e.Player];
 		WIMP_DSDInterface WSD = WIMP_DSDInterface(players[e.Player].mo.FindInventory("WIMP_DSDInterface"));
 
-		if (e.Name ~== "DSD_ApplySearch") {
-			// Hacky method to get stuff
-			int PrevSortMode = WSD.WP.SortMode;
-			WSD.WP.SortMode = 0; // Temporarily change back to using the actual storage
-
+		if (e.Name ~== "DSD_ApplySearch")
+		{
 			DSD.ApplySearch();
 
-			if (PrevSortMode != 0) {
+			int itemIndex = WSD.WP.WIMP.Items.Find(DSD.GetSelectedItem());
+			if (itemIndex != WSD.WP.WIMP.Items.Size())
+			{
+				WSD.WP.WIMPMode = true;
+				WSD.WP.WIMP.SelItemIndex = itemIndex;
 				WSD.WP.SyncStorage(DSD);
-				if (DSD.GetSelectedItem().HaveNone()) {
-					WSD.WP.SortMode = 2;
-				} else {
-					WSD.WP.SortMode = 1;
-				}
 			}
 			return;
 		}
@@ -64,29 +65,48 @@ class WIMP_DSDInterface : DSDInterface replaces DSDInterface {
 		WP = new("WIMPack");
 		WP.WIMP = new("WIMPItemStorage");
 		WP.WOMP = new("WOMPItemStorage");
-		WP.SortMode = 0;
 	}
 
 	override void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl) {
-		WP.DrawHUDStuff(sb, hdw, hpl, Storage, "\c[Cyan]Dimensional Storage Device");
+		WP.DrawHUDStuff(sb, hpl, Storage, "\c[Cyan]Dimensional Storage Device");
 
-		int BaseOffset = -80;
-		int TextHeight = sb.pSmallFont.mFont.GetHeight();
-		int TextPadding = TextHeight / 2;
-		int TextOffset = TextHeight + TextPadding;
-		int DisplayOffset = TextHeight * 6;
-		int OnBackpackOffset = (hdwimp_ui_type == 2)? (DisplayOffset + 1 + (TextOffset * 4)) : (DisplayOffset + (TextOffset * 6));
-		int OnPersonOffset = TextHeight + OnBackpackOffset;
+		Vector2 uiScale = (hdwimp_ui_scale, hdwimp_ui_scale);
+
+		float textHeight = sb.pSmallFont.mFont.GetHeight() * uiScale.y;
+		float textPadding = textHeight / 2;
+		float textOffset = textHeight + textPadding;
+		float baseOffset = textOffset * -6;
+
+		Vector2 itemInfoPos = (0, baseOffset + textHeight + (textOffset * 10));
 
 		// DSD UI stuff
+		// Insert/Remove amount
+		let selItem = DSDStorage(Storage).GetSelectedItem();
+		if (
+			selItem &&
+			selItem.ItemClass is "HDPickup" &&
+			!(selItem.ItemClass is "HDArmour")
+		)
+		{
+			sb.DrawString(
+				sb.pSmallFont,
+				"Insert/remove:  "..sb.FormatNumber(OperationAmount, 1, 3),
+				itemInfoPos,
+				sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER,
+				Font.CR_SAPPHIRE
+			);
+			itemInfoPos += (0, textOffset);
+		}
+
+		// Search text
 		int ItemCount = Storage.Items.Size();
 		if (ItemCount != 0) {
 			if (DSDStorage(Storage).InSearchMode) {
 				sb.DrawString(
 					sb.pSmallFont,
-					"Searching: "..DSDStorage(Storage).SearchString.."_",
-					(-60, BaseOffset + OnPersonOffset + TextHeight),
-					sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_LEFT,
+					"Searching:  "..DSDStorage(Storage).SearchString.."_",
+					itemInfoPos,
+					sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER,
 					Font.CR_WHITE
 				);
 			}
@@ -94,9 +114,11 @@ class WIMP_DSDInterface : DSDInterface replaces DSDInterface {
 	}
 
 	// Need to override this, else you can't upgrade your DSD
-	override void ActualPickup(Actor other, bool silent) {
+	override void ActualPickup(Actor other, bool silent)
+	{
 		let DSD = WIMP_DSDInterface(other.FindInventory("WIMP_DSDInterface"));
-		if (DSD && DSD.Storage) {
+		if (DSD && DSD.Storage)
+		{
 			other.A_StartSound("weapons/pocket");
 			other.A_Log("Your storage has expanded.", true);
 			DSD.Storage.MaxBulk += 1000;
@@ -108,37 +130,48 @@ class WIMP_DSDInterface : DSDInterface replaces DSDInterface {
 	}
 
 	// Because A_BPReady isn't really used
-	action void A_DSDReady() {
-		if (PressingFiremode()) {
-			if (JustPressed(BT_ATTACK)) {
+	action void A_DSDReady()
+	{
+		if (PressingFiremode())
+		{
+			if (JustPressed(BT_ATTACK))
+			{
 				Invoker.OperationAmount++;
-			} else if (JustPressed(BT_ALTATTACK)) {
+			}
+			else if (JustPressed(BT_ALTATTACK))
+			{
 				Invoker.OperationAmount--;
 			}
 
 			int InputAmount = GetMouseY(true);
-			if (InputAmount != 0) {
-				Invoker.OperationAmount += InputAmount / 64;
-			}
+			if (InputAmount != 0) Invoker.OperationAmount += int(ceil(InputAmount / 64));
 
 			Invoker.OperationAmount = clamp(invoker.OperationAmount, 1, 100);
-		} else {
+		}
+		else
+		{
 			invoker.RepeatTics--;
 			A_WeaponReady(WRF_ALLOWUSER3);
-			if (Invoker.RepeatTics <= 0) {
-				if (PressingReload()) {
+			if (Invoker.RepeatTics <= 0)
+			{
+				if (PressingReload())
+				{
 					A_UpdateStorage();
-					StorageItem SelItem = Invoker.Storage.GetSelectedItem();
-					if (SelItem) {
-						Invoker.Storage.TryInsertItem(SelItem.InvRef, self, Invoker.OperationAmount);
-						Invoker.RepeatTics = Invoker.Storage.GetOperationSpeed(SelItem.ItemClass, true);
+					StorageItem selItem = Invoker.Storage.GetSelectedItem();
+					if (SelItem)
+					{
+						Invoker.Storage.TryInsertItem(selItem.InvRef, self, Invoker.OperationAmount);
+						Invoker.RepeatTics = Invoker.Storage.GetOperationSpeed(selItem.ItemClass, SIIAct_Insert);
 					}
-				} else if (PressingUnload()) {
+				}
+				else if (PressingUnload())
+				{
 					A_UpdateStorage();
-					StorageItem SelItem = Invoker.Storage.GetSelectedItem();
-					if (SelItem) {
-						Invoker.Storage.RemoveItem(SelItem, self, null, Invoker.OperationAmount);
-						Invoker.RepeatTics = Invoker.Storage.GetOperationSpeed(SelItem.ItemClass, true);
+					StorageItem selItem = Invoker.Storage.GetSelectedItem();
+					if (SelItem)
+					{
+						Invoker.Storage.RemoveItem(selItem, self, null, Invoker.OperationAmount);
+						Invoker.RepeatTics = Invoker.Storage.GetOperationSpeed(selItem.ItemClass, SIIAct_Extract);
 					}
 				}
 			}
@@ -155,7 +188,8 @@ class WIMP_DSDInterface : DSDInterface replaces DSDInterface {
 	States {
 		Select0:
 			// Initialize shit to (try) prevent reading from address zero
-			TNT1 A 10 {
+			TNT1 A 10
+			{
 				Invoker.OperationAmount = 1;
 				A_UpdateStorage();
 				Invoker.WP.SyncStorage(invoker.Storage);
@@ -165,21 +199,20 @@ class WIMP_DSDInterface : DSDInterface replaces DSDInterface {
 			Wait;
 
 		Ready:
-			TNT1 A 1 {
+			TNT1 A 1
+			{
 				ItemStorage S = Invoker.Storage;
 				WIMPack W = Invoker.WP;
 				HDPlayerPawn Owner = HDPlayerPawn(Invoker.Owner);
-				if (!Owner.Player) {
-					return;
-				}
-				W.GetCVars(Owner.Player);
+				if (!Owner.Player) return;
 
-				if (W.CheckSwitch(Owner, S)) {
-					return;
-				}
+				W.GetCVars(Owner.Player);
+				W.SyncStorage(S);
+				A_UpdateStorage();
+
+				if (W.CheckSwitch(Owner, S)) return;
 
 				A_DSDReady();
-				W.SyncStorage(S);
 			}
 			Goto ReadyEnd;
 	}
