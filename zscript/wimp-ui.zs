@@ -148,7 +148,8 @@ extend class WIMPack
 				"=No Items Found=",
 				(0, wompListPos.y),
 				sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER,
-				Font.CR_DARKGRAY
+				Font.CR_DARKGRAY,
+				scale: uiScale
 			);
 			return;
 		}
@@ -247,7 +248,7 @@ extend class WIMPack
 		{
 			int maxCount = (WIMP.Items.Size() > 1)? 5 : 1;
 			float drawOffset = (maxCount == 5)? -(textOffset * 2) : 0;
-			float gapWidth = SmallFont.GetCharWidth("<") * uiScale.x;
+			float gapWidth = SmallFont.GetCharWidth(">") * uiScale.x;
 
 			for (int i = 0; i < maxCount; ++i)
 			{
