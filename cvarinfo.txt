@@ -5,6 +5,7 @@ nosave int hdwimp_womp_colour=17;
 
 nosave bool hdwimp_use_customcolourscheme=false;
 nosave int hdwimp_colourscheme=0;
+nosave float hdwimp_ui_scale=1.00;
 
 nosave bool hdwimp_show_icons=true;
 

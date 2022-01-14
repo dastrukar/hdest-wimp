@@ -19,6 +19,7 @@ OptionMenu "WIMPOptions" {
 	StaticText " "
 	StaticText "=UI Options=", "Gold"
 
+	Slider "UI Scale", "hdwimp_ui_scale", 0, 1, 0.05, 2
 	Option "Show item icons", "hdwimp_show_icons", "YesNo"
 	Option "Colour Scheme", "hdwimp_colourscheme", "WIMPColourSchemes"
 
