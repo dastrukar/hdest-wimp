@@ -108,7 +108,7 @@ extend class WIMPack
 		return W.Items[itemIndex];
 	}
 
-	ui void DrawHUDStuff(HDStatusBar sb, HDPlayerPawn hpl, ItemStorage storage, string label)
+	ui void DrawHUDStuff(HDStatusBar sb, HDPlayerPawn hpl, ItemStorage storage, string title, string subtitle)
 	{
 		Vector2 uiScale = (hdwimp_ui_scale, hdwimp_ui_scale);
 
@@ -123,14 +123,14 @@ extend class WIMPack
 		// Header
 		sb.DrawString(
 			sb.pSmallFont,
-			"\c[DarkBrown][] [] [] "..label.." \c[DarkBrown][] [] []",
+			title,
 			(0, baseOffset - textHeight),
 			sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER,
 			scale: uiScale
 		);
 		sb.DrawString(
 			sb.pSmallFont,
-			"Total Bulk: \cf"..int(storage.TotalBulk).."\c-",
+			subtitle,
 			(0, baseOffset),
 			sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER,
 			scale: uiScale

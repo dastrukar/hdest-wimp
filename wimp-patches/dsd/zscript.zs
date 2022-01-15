@@ -68,7 +68,13 @@ class WIMP_DSDInterface : DSDInterface replaces DSDInterface {
 	}
 
 	override void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl) {
-		WP.DrawHUDStuff(sb, hpl, Storage, "\c[Cyan]Dimensional Storage Device");
+		WP.DrawHUDStuff(
+			sb,
+			hpl,
+			Storage,
+			"\c[DarkGray][] [] [] \c[Cyan]Dimensional Storage Device \c[DarkGray][] [] []",
+			"Total Bulk: \cf"..int(Storage.TotalBulk).."/"..int(Storage.MaxBulk).."\c-"
+		);
 
 		Vector2 uiScale = (hdwimp_ui_scale, hdwimp_ui_scale);
 

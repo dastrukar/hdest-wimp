@@ -38,7 +38,13 @@ class WIMP_AmmoPouch : UaS_AmmoPouch replaces UaS_AmmoPouch
 
 	override void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl)
 	{
-		WP.DrawHUDStuff(sb, hpl, Storage, "\c[Tan]Ammo Pouch");
+		WP.DrawHUDStuff(
+			sb,
+			hpl,
+			Storage,
+			"\c[DarkBrown][] [] [] \c[Tan]Ammo Pouch \c[DarkBrown][] [] []",
+			"Total Bulk: \cf"..int(Storage.TotalBulk).."\c-"
+		);
 	}
 
 	States

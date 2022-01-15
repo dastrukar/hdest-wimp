@@ -38,7 +38,13 @@ class WIMP_AssaultPack : UaS_AssaultPack replaces UaS_AssaultPack
 
 	override void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl)
 	{
-		WP.DrawHUDStuff(sb, hpl, Storage, "\c[Tan]Assault Pack");
+		WP.DrawHUDStuff(
+			sb,
+			hpl,
+			Storage,
+			"\c[DarkBrown][] [] [] \c[Tan]Assault Pack \c[DarkBrown][] [] []",
+			"Total Bulk: \cf"..int(Storage.TotalBulk).."\c-"
+		);
 	}
 
 	States
