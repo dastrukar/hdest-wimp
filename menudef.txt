@@ -9,7 +9,7 @@ OptionMenu "WIMPOptions" {
 	Title "WIMP Options"
 
 	StaticText " "
-	StaticText "=Control Modifiers=", "Gold"
+	StaticText "= Control Modifiers =", "Gold"
 
 	Option "Invert item cycling", "hdwimp_invert_item_cycling", "YesNo"
 	Option "Invert mode cycling", "hdwimp_invert_mode_cycling", "YesNo"
@@ -17,22 +17,22 @@ OptionMenu "WIMPOptions" {
 	Slider "Scrolling insensitivity", "hdwimp_scrolling_sensitivity", 1, 1000, 1
 
 	StaticText " "
-	StaticText "=UI Options=", "Gold"
+	StaticText "= UI Options =", "Gold"
 
 	Slider "UI Scale", "hdwimp_ui_scale", 0, 1, 0.05, 2
 	Option "Show item icons", "hdwimp_show_icons", "YesNo"
 	Option "Colour Scheme", "hdwimp_colourscheme", "WIMPColourSchemes"
 
 	StaticText " "
-	StaticText "=Custom Colours=", "Gold"
+	StaticText "= Custom Colours =", "Gold"
 
 	Option "Use Custom Colours", "hdwimp_use_customcolourscheme", "YesNo"
-	StaticText "-In Backpack-", "Cyan"
+	StaticText "- In Backpack -", "LightBlue"
 	Option "Selected Colour", "hdwimp_wimp_selected_colour", "TextColors", "hdwimp_use_customcolourscheme"
 	Option "Not Selected Colour", "hdwimp_wimp_colour", "TextColors", "hdwimp_use_customcolourscheme"
 
 	StaticText " "
-	StaticText "-On Person-", "Cyan"
+	StaticText "- On Person -", "LightBlue"
 
 	Option "Selected Colour", "hdwimp_womp_selected_colour", "TextColors", "hdwimp_use_customcolourscheme"
 	Option "Not Selected Colour", "hdwimp_womp_colour", "TextColors", "hdwimp_use_customcolourscheme"
