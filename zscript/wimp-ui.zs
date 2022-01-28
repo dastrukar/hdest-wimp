@@ -6,6 +6,15 @@ extend class WIMPack
 	// Returns wimpColour, wompColour, wimpColourSelected, wompColourSelected
 	ui int, int, int, int GetColourScheme()
 	{
+		if (hdwimp_use_customcolourscheme)
+		{
+			return
+				hdwimp_wimp_colour,
+				hdwimp_womp_colour,
+				hdwimp_wimp_selected_colour,
+				hdwimp_womp_selected_colour;
+		}
+
 		switch (hdwimp_colourscheme)
 		{
 			case 1: // Dast (the original default colour scheme before Fractal came along)
