@@ -15,6 +15,8 @@ Don't like the colours? Don't worry, you can change them in `WIMP Options`.
 Inside the folder named [`wimp-patches`](wimp-patches), you'll find some patches I made for other addons that adds new backpacks.   
 While you don't have to use them, they do make the new backpacks use WIMP's system.
 
+To use the patches, just load them after WIMP and whatever addon the patch is meant to support.
+
 If you want an addon to be supported, feel free to make a issue request or let me know about the addon.
 
 ## Other info
