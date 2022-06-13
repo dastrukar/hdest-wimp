@@ -88,7 +88,7 @@ class WIMP_HDWallet : HDWallet replaces HDWallet
 
 		// Some flavourful text from the wallet
 		StorageItem selItem = Storage.GetSelectedItem();
-		if (!selItem && selItem.Amounts.Size() == 0) return;
+		if (!selItem || selItem.Amounts.Size() == 0) return;
 
 		int money = selItem.Amounts[0];
 		string walletText =
