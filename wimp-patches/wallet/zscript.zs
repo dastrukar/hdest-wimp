@@ -92,6 +92,7 @@ class WIMP_HDWallet : HDWallet replaces HDWallet
 
 		int money = selItem.Amounts[0];
 		string walletText =
+			(money == 0)? "Ha ha! You're \c[Red]POOR!" :
 			(money <= 250)? "Man, You can't even afford Taco Bell." :
 			(money <= 500)? "Ok. Now you got a little walking around money." :
 			(money <= 750)? "You saving up for a rainy day now?" :
