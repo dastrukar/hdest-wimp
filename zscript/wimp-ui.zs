@@ -117,7 +117,15 @@ extend class WIMPack
 		return W.Items[itemIndex];
 	}
 
-	ui void DrawHUDStuff(HDStatusBar sb, HDPlayerPawn hpl, ItemStorage storage, string title, string subtitle)
+	ui void DrawHUDStuff(
+		HDStatusBar sb,
+		HDPlayerPawn hpl,
+		ItemStorage storage,
+		string title,
+		string subtitle,
+		string inBackpackText = "In backpack:",
+		string onPersonText = "On person:"
+	)
 	{
 		Vector2 uiScale = (hdwimp_ui_scale, hdwimp_ui_scale);
 
@@ -311,7 +319,7 @@ extend class WIMPack
 
 			sb.DrawString(
 				sb.pSmallFont,
-				"In backpack:  "..sb.FormatNumber(wimpCount, 1, 6),
+				inBackpackText.."  "..sb.FormatNumber(wimpCount, 1, 6),
 				itemInfoPos,
 				sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER,
 				(wimpCount > 0)? Font.CR_BROWN : Font.CR_DARKBROWN,
@@ -319,8 +327,8 @@ extend class WIMPack
 			);
 			sb.DrawString(
 				sb.pSmallFont,
-				"On person:  "..sb.FormatNumber(wompCount, 1, 6),
-				itemInfoPos + (0, TextHeight),
+				onPersonText.."  "..sb.FormatNumber(wompCount, 1, 6),
+				itemInfoPos + (0, textHeight),
 				sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_CENTER,
 				(wompCount > 0)? Font.CR_WHITE : Font.CR_DARKGRAY,
 				scale: uiScale
