@@ -1,0 +1,4 @@
+GameInfo
+{
+    AddEventHandlers = "WIMP_GunsmithPouchReplacer"
+}
