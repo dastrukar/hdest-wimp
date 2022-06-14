@@ -4,23 +4,27 @@ class UaS_AmmoPouch_Replacer : EventHandler
 {
 	override void WorldThingSpawned(WorldEvent e)
 	{
-		let T = e.Thing;
+		let pack = UaS_AmmoPouch(e.Thing);
 
-		if (
-			T &&
-			T.GetClassName() == "UaS_AmmoPouch" &&
-			HDBackpack(T).Owner
-		)
+		if (!(
+			pack &&
+			pack.GetClassName() == "UaS_AmmoPouch" &&
+			pack.Owner
+		)) return;
+
+		let wimp = WIMP_AmmoPouch(pack.Owner.FindInventory("WIMP_AmmoPouch"));
+
+		if (wimp) WIMP_AmmoPouch.AddPouch(wimp, pack, 0);
+		else
 		{
-			HDBackpack hdb = HDBackpack(T);
-			hdb.Owner.GiveInventory("WIMP_AmmoPouch", 1);
-
-			WIMP_AmmoPouch wimp = WIMP_AmmoPouch(hdb.Owner.FindInventory("WIMP_AmmoPouch"));
-			wimp.Storage = hdb.Storage;
-			wimp.MaxCapacity = hdb.MaxCapacity;
-
-			hdb.Destroy();
+			wimp = WIMP_AmmoPouch(pack.Owner.GiveInventoryType("WIMP_AmmoPouch"));
+			wimp.Storage = pack.Storage;
+			wimp.MaxCapacity = pack.MaxCapacity;
+			wimp.WeaponStatus[0] = pack.WeaponStatus[0];
+			Console.PrintF("%d", pack.WeaponStatus[0]);
 		}
+
+		pack.Destroy();
 	}
 }
 
@@ -43,8 +47,35 @@ class WIMP_AmmoPouch : UaS_AmmoPouch replaces UaS_AmmoPouch
 			hpl,
 			Storage,
 			"\c[DarkBrown][] [] [] \c[Tan]Ammo Pouch \c[DarkBrown][] [] []",
-			"Total Bulk: \cf"..int(Storage.TotalBulk).."\c-"
+			"Total Bulk: \c[Gold]"..int(Storage.TotalBulk).."\c- --- Pouches: \c[Gold]"..WeaponStatus[APS_AMOUNT].."\c-"
 		);
+	}
+
+	// Handle extra pouches
+	override void ActualPickup(Actor other, bool silent)
+	{
+		let heldPouch = WIMP_AmmoPouch(other.FindInventory("WIMP_AmmoPouch"));
+		if (!heldPouch)
+		{
+			Super.ActualPickup(other, silent);
+			return;
+		}
+
+		AddPouch(heldPouch, Self, 0);
+		Destroy();
+	}
+
+	static void AddPouch(WIMP_AmmoPouch heldPouch, UaS_AmmoPouch pouch, int index)
+	{
+		heldPouch.WeaponStatus[index]++;
+		heldPouch.UpdateCapacity();
+
+		for (int i = 0; i < pouch.Storage.Items.Size(); i++)
+		{
+			StorageItem item = pouch.Storage.Items[i];
+			int amountToMove = (item.Amounts.Size() > 0)? item.Amounts[0] : 0;
+			heldPouch.Storage.AddAmount(item.ItemClass, amountToMove);
+		}
 	}
 
 	States
