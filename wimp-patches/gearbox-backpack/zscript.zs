@@ -4,20 +4,28 @@ class WIMP_HDGearBoxReplacer : EventHandler
 {
 	override void WorldThingSpawned(WorldEvent e)
 	{
-		let gearBox = HDGearBox(e.Thing);
+		let pack = HDGearBox(e.Thing);
 		if (!(
-			gearBox &&
-			gearBox.GetClassName() == "HDGearBox" &&
-			gearBox.Owner
+			pack &&
+			pack.GetClassName() == "HDGearBox"
 		)) return;
 
-		gearBox.Owner.GiveInventory("WIMP_HDGearBox", 1);
+		WIMP_HDGearBox wimp;
 
-		let wimpBox = WIMP_HDGearBox(gearBox.Owner.FindInventory("WIMP_HDGearBox"));
-		wimpBox.Storage = gearBox.Storage;
-		wimpBox.MaxCapacity = wimpBox.MaxCapacity;
+		if (pack.Owner) wimp = WIMP_HDGearBox(pack.Owner.GiveInventoryType("WIMP_HDGearBox"));
+		else
+		{
+			wimp = WIMP_HDGearBox(Actor.Spawn("WIMP_HDGearBox", pack.Owner.pos));
 
-		gearBox.Destroy();
+			wimp.Angle = pack.Angle;
+			wimp.A_ChangeVelocity(1.5, 0, 1, CVF_RELATIVE);
+			wimp.Vel += pack.Vel;
+		}
+
+		wimp.Storage = pack.Storage;
+		wimp.MaxCapacity = pack.MaxCapacity;
+
+		pack.Destroy();
 	}
 }
 
