@@ -4,37 +4,28 @@ class HDBackpackReplacer : EventHandler
 {
 	override void WorldThingSpawned(WorldEvent e)
 	{
-		let T = e.Thing;
+		let pack = HDBackpack(e.Thing);
+		if (!(
+			pack &&
+			pack.GetClassName() == "HDBackpack"
+		)) return;
 
-		if (
-			T &&
-			T.GetClassName() == "HDBackpack" &&
-			HDBackpack(T).Owner
-		)
+		WIMPHDBackpack wimp;
+
+		if (pack.Owner) wimp = WIMPHDBackpack(pack.Owner.GiveInventoryType("WIMPHDBackpack"));
+		else
 		{
-			HDBackpack hdb = HDBackpack(T);
-			WIMPHDBackpack wimp;
+			wimp = WIMPHDBackpack(Actor.Spawn("WIMPHDBackpack", pack.Pos));
 
-			// Already has a backpack?
-			if (hdb.Owner.FindInventory("WIMPHDBackpack"))
-			{
-				wimp = WIMPHDBackpack(Actor.Spawn("WIMPHDBackpack", hdb.Owner.pos));
-
-				wimp.angle = hdb.owner.angle;
-				wimp.A_ChangeVelocity(1.5, 0, 1, CVF_RELATIVE);
-				wimp.vel += hdb.owner.vel;
-			}
-			else
-			{
-				hdb.Owner.GiveInventory("WIMPHDBackpack", 1);
-				wimp = WIMPHDBackpack(hdb.Owner.FindInventory("WIMPHDBackpack"));
-			}
-
-			wimp.Storage = hdb.Storage;
-			wimp.MaxCapacity = hdb.MaxCapacity;
-
-			hdb.Destroy();
+			wimp.Angle = pack.Angle;
+			wimp.A_ChangeVelocity(1.5, 0, 1, CVF_RELATIVE);
+			wimp.Vel += pack.Vel;
 		}
+
+		wimp.Storage = pack.Storage;
+		wimp.MaxCapacity = pack.MaxCapacity;
+
+		pack.Destroy();
 	}
 }
 
