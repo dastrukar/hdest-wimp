@@ -21,7 +21,6 @@ class UaS_AmmoPouch_Replacer : EventHandler
 			wimp.Storage = pack.Storage;
 			wimp.MaxCapacity = pack.MaxCapacity;
 			wimp.WeaponStatus[0] = pack.WeaponStatus[0];
-			Console.PrintF("%d", pack.WeaponStatus[0]);
 		}
 
 		pack.Destroy();
