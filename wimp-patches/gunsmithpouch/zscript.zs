@@ -46,7 +46,8 @@ class WIMP_GunsmithPouch : GunsmithPouch replaces GunsmithPouch
 			hpl,
 			Storage,
 			"\c[DarkBrown][] [] [] \c[DarkGreen]Gunsmith Pouch \c[DarkBrown][] [] []",
-			"Total Bulk: \c[Gold]"..int(Storage.TotalBulk).."\c- --- Pouches: \c[Gold]"..WeaponStatus[GSP_AMOUNT].."\c-"
+			"Total Bulk: \c[Gold]"..int(Storage.TotalBulk).."\c- --- Pouches: \c[Gold]"..WeaponStatus[GSP_AMOUNT].."\c-",
+			"In pouch:"
 		);
 	}
 
