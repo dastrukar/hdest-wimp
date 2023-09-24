@@ -92,6 +92,7 @@ class WIMPHDBackpack : HDBackpack replaces HDBackpack
 				{
 					A_BPReady();
 				}
+				else {Console.PrintF("wimp: %d", Invoker.Storage.SelItemIndex);}
 			}
 			Goto ReadyEnd;
 	}

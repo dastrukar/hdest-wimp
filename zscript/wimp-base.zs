@@ -89,19 +89,69 @@ class WOMPItemStorage : WIMPItemStorage
 	}
 }
 
-class WIMPack play
+class WIMPack : Inventory
 {
 	// true  - WIMP(What's In My Pack): Shows items in backpack
 	// false - WOMP(What's Outside My Pack): Does the opposite of WIMP
 	bool WIMPMode;
 	WIMPItemStorage WIMP;
 	WOMPItemStorage WOMP;
+	Array<WIMPInterface> interfaces;
 
 	//CVars
 	transient bool InvertItemCycling;
 	transient bool InvertModeCycling;
 	transient bool InvertScrolling;
 	transient int ScrollingInSens;
+
+	Default
+	{
+		-Inventory.INVBAR;
+		+Inventory.UNTOSSABLE;
+	}
+
+	override void BeginPlay()
+	{
+		WIMPMode = false;
+		WIMP = new("WIMPItemStorage");
+		WOMP = new("WOMPItemStorage");
+
+		interfaces.Clear();
+		for (int i = 0; i < AllClasses.Size(); i++)
+		{
+			if (!(AllClasses[i] is "WIMPInterface") || AllClasses[i].IsAbstract())
+			{
+				continue;
+			}
+
+			let interface = WIMPInterface(new(AllClasses[i]));
+			interface.Init();
+			interfaces.Push(interface);
+		}
+	}
+
+	override void DoEffect()
+	{
+		let hdp = HDPlayerPawn(owner);
+		if (!hdp) return;
+
+		GetCVars(hdp.Player);
+
+		let hdb = HDBackpack(hdp.Player.ReadyWeapon);
+		if (!hdb) return;
+
+		for (int i = 0; i < interfaces.Size(); i++)
+		{
+			if (!interfaces[i].CheckBackpack(hdb)) continue;
+
+			interfaces[i].DoEffect(self, hdb, hdp);
+			break;
+		}
+
+		// force update storage to sync ui properly
+		hdb.Storage.UpdateStorage(hdb, hdb.Owner);
+		SyncStorage(hdb.Storage);
+	}
 
 	// Some stuff from HDBackpack's code
 	clearscope int GetAmountOnPerson(Inventory item)
@@ -236,11 +286,13 @@ class WIMPack play
 			{
 				ignoreBPReady = true;
 				S.PrevItem();
+				Console.PrintF("hijack: %d", S.SelItemIndex);
 			}
 			else if (JustPressed(Owner, GetCycleInput(false, InvertItemCycling)))
 			{
 				ignoreBPReady = true;
 				S.NextItem();
+				Console.PrintF("hijack: %d", S.SelItemIndex);
 			}
 		}
 		return ignoreBPReady;
@@ -268,5 +320,32 @@ class WIMPack play
 			return true;
 		}
 		return false;
+	}
+}
+
+class WIMPTest : Inventory
+{
+	Default
+	{
+		-Inventory.INVBAR;
+		+Inventory.UNTOSSABLE;
+	}
+
+	override void DoEffect()
+	{
+		let hdp = HDPlayerPawn(Owner);
+		if (!hdp || !HDBackpack(hdp.Player.ReadyWeapon))
+		{
+			return ;
+		}
+
+		let bak = HDBackpack(hdp.Player.ReadyWeapon);
+		if (
+			(hdp.Player.Buttons & BT_ATTACK && !(hdp.Player.OldButtons & BT_ATTACK))
+			|| (hdp.Player.Buttons & BT_ALTFIRE && !(hdp.Player.OldButtons & BT_ALTFIRE))
+		)
+		{
+			Console.PrintF("test: %d", bak.Storage.SelItemIndex);
+		}
 	}
 }

@@ -1,8 +1,44 @@
 // UI hell revamped
 const HDWIMP_MAX_ICON_SIZE = 16;
 
-extend class WIMPack
+class WIMPackOverride : HCItemOverride
 {
+	Dictionary names;
+
+	override void Init(HCStatusbar sb)
+	{
+		Priority = 0;
+		OverrideType = HCOVERRIDETYPE_WEAPON;
+
+		names = Dictionary.Create();
+		names.Insert("HDBackPack", "\c[DarkBrown][] [] [] \c[Tan]Backpack \c[DarkBrown][] [] []");
+		names.Insert("UaS_AmmoPouch", "\c[DarkBrown][] [] [] \c[Tan]Ammo Pouch \c[DarkBrown][] [] []");
+		names.Insert("UaS_AssaultPack", "\c[DarkBrown][] [] [] \c[Tan]Assault Pack \c[DarkBrown][] [] []");
+	}
+
+	override bool CheckItem(Inventory item)
+	{
+		return (
+			item.GetClassName() == "HDBackPack"
+			|| item.GetClassName() == "UaS_AmmoPouch"
+			|| item.GetClassName() == "UaS_AssaultPack"
+		);
+	}
+
+	override void DrawHUDStuff(HCStatusbar sb, Inventory item, int hdFlags, int gzFlags)
+	{
+		let hdb = HDBackpack(item);
+		string title = names.At(hdb.GetClassName());
+		string subtitle = "Total Bulk: \cf"..int(hdb.Storage.TotalBulk).."\c-";
+
+		DrawWIMPHUDStuff(
+			sb,
+			hdb.Storage,
+			title,
+			subtitle
+		);
+	}
+
 	// Returns wimpColour, wompColour, wimpColourSelected, wompColourSelected
 	ui int, int, int, int GetColourScheme()
 	{
@@ -55,7 +91,7 @@ extend class WIMPack
 	// generic draw text function because managing two draw functions is a pain in the ass
 	// also yes this is horrendous
 	ui void DrawListEntry(
-		HDStatusBar sb,
+		HCStatusBar sb,
 		bool isSelected,
 		string text,
 		string icon,
@@ -117,9 +153,8 @@ extend class WIMPack
 		return W.Items[itemIndex];
 	}
 
-	ui void DrawHUDStuff(
-		HDStatusBar sb,
-		HDPlayerPawn hpl,
+	ui void DrawWIMPHUDStuff(
+		HCStatusBar sb,
 		ItemStorage storage,
 		string title,
 		string subtitle,
@@ -127,6 +162,10 @@ extend class WIMPack
 		string onPersonText = "On person:"
 	)
 	{
+		let hpl = HDPlayerPawn(sb.CPlayer.mo);
+		let wimPack = WIMPack(hpl.FindInventory("WIMPack"));
+		if (!wimPack) return;
+
 		Vector2 uiScale = (hdwimp_ui_scale, hdwimp_ui_scale);
 
 		float textHeight = sb.pSmallFont.mFont.GetHeight() * uiScale.y;
@@ -172,8 +211,8 @@ extend class WIMPack
 		}
 
 		// List titles
-		string wompText = (WIMPMode)? "\c[DarkGray][WOMP]" : "\c[Fire]<WOMP>";
-		string wimpText = (WIMPMode)? "\c[Fire]<WIMP>" : "\c[DarkGray][WIMP]";
+		string wompText = (wimPack.WIMPMode)? "\c[DarkGray][WOMP]" : "\c[Fire]<WOMP>";
+		string wimpText = (wimPack.WIMPMode)? "\c[Fire]<WIMP>" : "\c[DarkGray][WIMP]";
 
 		Vector2 wompTitlePos = (wompListPos.x, wompListPos.y - (textOffset * 3));
 		Vector2 wimpTitlePos = (wimpListPos.x, wimpListPos.y - (textOffset * 3));
@@ -189,7 +228,7 @@ extend class WIMPack
 			"========================",
 			wompTitlePos,
 			sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_RIGHT,
-			(WIMPMode)? Font.CR_DARKGRAY : Font.CR_WHITE,
+			(wimPack.WIMPMode)? Font.CR_DARKGRAY : Font.CR_WHITE,
 			scale: uiScale
 		);
 
@@ -205,9 +244,12 @@ extend class WIMPack
 			"========================",
 			wimpTitlePos,
 			sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_LEFT,
-			(WIMPMode)? Font.CR_WHITE : Font.CR_DARKGRAY,
+			(wimPack.WIMPMode)? Font.CR_WHITE : Font.CR_DARKGRAY,
 			scale: uiScale
 		);
+
+		let WIMP = wimPack.WIMP;
+		let WOMP = wimPack.WOMP;
 
 		// WOMP List
 		if (WOMP.Items.Size())
@@ -221,7 +263,7 @@ extend class WIMPack
 				StorageItem curItem = GetStorageItem(WOMP, i);
 
 				bool isSelected = (
-					!WIMPMode &&
+					!wimPack.WIMPMode &&
 					(i == 2 || maxCount == 1)
 				);
 				bool inWIMP = (WIMP.Items.Find(curItem) != WIMP.ActualIndex.Size());
@@ -272,7 +314,7 @@ extend class WIMPack
 				StorageItem curItem = GetStorageItem(WIMP, i);
 
 				bool isSelected = (
-					WIMPMode &&
+					wimPack.WIMPMode &&
 					(i == 2 || maxCount == 1)
 				);
 				int selectedOffset = (isSelected)? gapWidth * 2 : 0;
@@ -315,7 +357,7 @@ extend class WIMPack
 		if (selItem)
 		{
 			int wimpCount = (selItem.ItemClass is "HDMagAmmo")? selItem.Amounts.Size() : ((selItem.Amounts.Size() > 0)? selItem.Amounts[0] : 0);
-			int wompCount = GetAmountOnPerson(hpl.FindInventory(selItem.ItemClass));
+			int wompCount = wimPack.GetAmountOnPerson(hpl.FindInventory(selItem.ItemClass));
 
 			sb.DrawString(
 				sb.pSmallFont,
