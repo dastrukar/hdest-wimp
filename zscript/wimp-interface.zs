@@ -15,9 +15,11 @@ class WIMPInterface_GenericBackpack : WIMPInterface
 	{
 		return (
 			hdb && (
-				hdb.GetClassName() == "HDBackpack"
+				hdb.GetClassName() == "HDBackPack"
 				|| hdb.GetClassName() == "UaS_AmmoPouch"
 				|| hdb.GetClassName() == "UaS_AssaultPack"
+				|| hdb.GetClassName() == "GunsmithPouch"
+				|| hdb.GetClassName() == "HDGearBox"
 			)
 		);
 	}
