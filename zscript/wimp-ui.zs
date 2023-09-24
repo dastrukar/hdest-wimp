@@ -4,6 +4,7 @@ const HDWIMP_MAX_ICON_SIZE = 16;
 class WIMPackOverride : HCItemOverride
 {
 	Dictionary names;
+	Dictionary inPackText;
 
 	override void Init(HCStatusbar sb)
 	{
@@ -14,6 +15,15 @@ class WIMPackOverride : HCItemOverride
 		names.Insert("HDBackPack", "\c[DarkBrown][] [] [] \c[Tan]Backpack \c[DarkBrown][] [] []");
 		names.Insert("UaS_AmmoPouch", "\c[DarkBrown][] [] [] \c[Tan]Ammo Pouch \c[DarkBrown][] [] []");
 		names.Insert("UaS_AssaultPack", "\c[DarkBrown][] [] [] \c[Tan]Assault Pack \c[DarkBrown][] [] []");
+		names.Insert("GunsmithPouch", "\c[DarkBrown][] [] [] \c[DarkGreen]Gunsmith Pouch \c[DarkBrown][] [] []");
+		names.Insert("HDGearBox", "\c[DarkBrown][] [] [] \c[Ice]GearBox \c[DarkBrown][] [] []");
+
+		inPackText = Dictionary.Create();
+		inPackText.Insert("HDBackPack", "In backpack:");
+		inPackText.Insert("UaS_AmmoPouch", "In pouch:");
+		inPackText.Insert("UaS_AssaultPack", "In backpack:");
+		inPackText.Insert("GunsmithPouch", "In pouch:");
+		inPackText.Insert("HDGearBox", "In backpack:");
 	}
 
 	override bool CheckItem(Inventory item)
@@ -22,6 +32,8 @@ class WIMPackOverride : HCItemOverride
 			item.GetClassName() == "HDBackPack"
 			|| item.GetClassName() == "UaS_AmmoPouch"
 			|| item.GetClassName() == "UaS_AssaultPack"
+			|| item.GetClassName() == "GunsmithPouch"
+			|| item.GetClassName() == "HDGearBox"
 		);
 	}
 
@@ -29,14 +41,27 @@ class WIMPackOverride : HCItemOverride
 	{
 		let hdb = HDBackpack(item);
 		string title = names.At(hdb.GetClassName());
-		string subtitle = "Total Bulk: \cf"..int(hdb.Storage.TotalBulk).."\c-";
+		string subtitle = GetSubtitle(hdb);
+		string inBackpackText = inPackText.At(hdb.GetClassName());
+		string onPersonText = "On person:";
 
 		DrawWIMPHUDStuff(
 			sb,
 			hdb.Storage,
 			title,
-			subtitle
+			subtitle,
+			inBackpackText,
+			onPersonText
 		);
+	}
+
+	string GetSubtitle(HDBackpack hdb)
+	{
+		if (hdb.GetClassName() == "UaS_AmmoPouch" || hdb.GetClassName() == "GunsmithPouch")
+		{
+			return "Total Bulk: \c[Gold]"..int(hdb.Storage.TotalBulk).."\c- --- Pouches: \c[Gold]"..hdb.WeaponStatus[0].."\c-";
+		}
+		return "Total Bulk: \cf"..int(hdb.Storage.TotalBulk).."\c-";
 	}
 
 	// Returns wimpColour, wompColour, wimpColourSelected, wompColourSelected
@@ -158,8 +183,8 @@ class WIMPackOverride : HCItemOverride
 		ItemStorage storage,
 		string title,
 		string subtitle,
-		string inBackpackText = "In backpack:",
-		string onPersonText = "On person:"
+		string inBackpackText,
+		string onPersonText
 	)
 	{
 		let hpl = HDPlayerPawn(sb.CPlayer.mo);
