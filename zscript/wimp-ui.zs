@@ -58,9 +58,8 @@ class WIMPackOverride : HCItemOverride
 	string GetSubtitle(HDBackpack hdb)
 	{
 		if (hdb.GetClassName() == "UaS_AmmoPouch" || hdb.GetClassName() == "GunsmithPouch")
-		{
 			return "Total Bulk: \c[Gold]"..int(hdb.Storage.TotalBulk).."\c- --- Pouches: \c[Gold]"..hdb.WeaponStatus[0].."\c-";
-		}
+
 		return "Total Bulk: \cf"..int(hdb.Storage.TotalBulk).."\c-";
 	}
 
@@ -110,6 +109,7 @@ class WIMPackOverride : HCItemOverride
 					Font.CR_RED;
 				break;
 		}
+
 		return 0, 0, 0, 0;
 	}
 
@@ -171,9 +171,7 @@ class WIMPackOverride : HCItemOverride
 		int itemCount = W.Items.Size();
 		int itemIndex = (W.SelItemIndex + (index - 2)) % itemCount;
 		if (itemIndex < 0)
-		{
 			itemIndex = itemCount - Abs(itemIndex);
-		}
 
 		return W.Items[itemIndex];
 	}
@@ -189,7 +187,8 @@ class WIMPackOverride : HCItemOverride
 	{
 		let hpl = HDPlayerPawn(sb.CPlayer.mo);
 		let wimPack = WIMPack(hpl.FindInventory("WIMPack"));
-		if (!wimPack) return;
+		if (!wimPack)
+			return;
 
 		Vector2 uiScale = (hdwimp_ui_scale, hdwimp_ui_scale);
 

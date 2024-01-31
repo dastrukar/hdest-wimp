@@ -26,7 +26,8 @@ class WIMPInterface_GenericBackpack : WIMPInterface
 
 	override void DoEffect(WIMPack wimp, HDBackpack hdb, HDPlayerPawn owner)
 	{
-		if (wimp.CheckSwitch(owner, hdb.Storage)) return;
+		if (wimp.CheckSwitch(owner, hdb.Storage))
+			return;
 
 		wimp.HandleWIMP(owner, hdb.Storage);
 	}

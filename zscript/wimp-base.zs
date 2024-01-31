@@ -7,16 +7,15 @@ class WIMPItemStorage play
 	clearscope StorageItem GetSelectedItem()
 	{
 		if (!(SelItemIndex > Items.Size()))
-		{
 			return Items[SelItemIndex];
-		}
 
 		return null;
 	}
 
 	virtual void UpdateStorage(ItemStorage storage)
 	{
-		if (!storage) return;
+		if (!storage)
+			return;
 
 		// just clear it
 		Items.Clear();
@@ -38,13 +37,17 @@ class WIMPItemStorage play
 			}
 		}
 
-		if (Items.Size()) ClampSelItemIndex();
+		if (Items.Size())
+			ClampSelItemIndex();
 	}
 
 	void ClampSelItemIndex()
 	{
-		if (SelItemIndex >= Items.Size()) SelItemIndex = 0;
-		else if (SelItemIndex < 0) SelItemIndex = Items.Size() - 1;
+		if (SelItemIndex >= Items.Size())
+			SelItemIndex = 0;
+
+		else if (SelItemIndex < 0)
+			SelItemIndex = Items.Size() - 1;
 	}
 
 	void NextItem()
@@ -64,7 +67,8 @@ class WOMPItemStorage : WIMPItemStorage
 {
 	override void UpdateStorage(ItemStorage storage)
 	{
-		if (!storage) return;
+		if (!storage)
+			return;
 
 		// just clear it
 		Items.Clear();
@@ -85,7 +89,8 @@ class WOMPItemStorage : WIMPItemStorage
 			}
 		}
 
-		if (Items.Size()) ClampSelItemIndex();
+		if (Items.Size())
+			ClampSelItemIndex();
 	}
 }
 
@@ -120,9 +125,7 @@ class WIMPack : Inventory
 		for (int i = 0; i < AllClasses.Size(); i++)
 		{
 			if (!(AllClasses[i] is "WIMPInterface") || AllClasses[i].IsAbstract())
-			{
 				continue;
-			}
 
 			let interface = WIMPInterface(new(AllClasses[i]));
 			interface.Init();
@@ -133,16 +136,19 @@ class WIMPack : Inventory
 	override void DoEffect()
 	{
 		let hdp = HDPlayerPawn(owner);
-		if (!hdp) return;
+		if (!hdp)
+			return;
 
 		GetCVars(hdp.Player);
 
 		let hdb = HDBackpack(hdp.Player.ReadyWeapon);
-		if (!hdb) return;
+		if (!hdb)
+			return;
 
 		for (int i = 0; i < interfaces.Size(); i++)
 		{
-			if (!interfaces[i].CheckBackpack(hdb)) continue;
+			if (!interfaces[i].CheckBackpack(hdb))
+				continue;
 
 			interfaces[i].DoEffect(self, hdb, hdp);
 			break;
@@ -159,7 +165,7 @@ class WIMPack : Inventory
 		let wpn = HDWeapon(item);
 		let pkp = HDPickup(item);
 
-		return wpn ? wpn.ActualAmount : pkp ? pkp.Amount : 0;
+		return (wpn)? wpn.ActualAmount : (pkp)? pkp.Amount : 0;
 	}
 
 	bool PressingFiremode(HDPlayerPawn Owner)
@@ -178,12 +184,11 @@ class WIMPack : Inventory
 	int GetMouseY(HDPlayerPawn Owner, bool hijack=false)
 	{
 		if (hijack)
-		{
 			Owner.reactionTime = Max(Owner.reactionTime,1);
-		}
 
 		double Pitch = Owner.Player.cmd.Pitch;
-		if (InvertScrolling) Pitch = Pitch * -1;
+		if (InvertScrolling)
+			Pitch = Pitch * -1;
 
 		return Pitch;
 	}
@@ -203,13 +208,10 @@ class WIMPack : Inventory
 		WIMP.UpdateStorage(storage);
 		WOMP.UpdateStorage(storage);
 		if (WIMPMode && WIMP.ActualIndex.Size() > 0)
-		{
 			storage.SelItemIndex = WIMP.ActualIndex[WIMP.SelItemIndex];
-		}
+
 		else if (WOMP.ActualIndex.Size() > 0)
-		{
 			storage.SelItemIndex = WOMP.ActualIndex[WOMP.SelItemIndex];
-		}
 	}
 
 	// Handle WIMP inputs
@@ -219,20 +221,20 @@ class WIMPack : Inventory
 		if (Owner.Player.cmd.Buttons & BT_ALTRELOAD) WIMPMode = true;
 
 		if (WIMPMode)
-		{
 			return WIMPHijackMouseInput(Owner, WIMP);
-		}
+
 		else
-		{
 			return WIMPHijackMouseInput(Owner, WOMP);
-		}
 	}
 
 	// Returns the input used for cycling through items
 	int GetCycleInput(bool CyclePrev, bool Invert)
 	{
-		if (CyclePrev) return (Invert)? BT_ALTATTACK : BT_ATTACK;
-		else return (Invert)? BT_ATTACK : BT_ALTATTACK;
+		if (CyclePrev)
+			return (Invert)? BT_ALTATTACK : BT_ATTACK;
+
+		else
+			return (Invert)? BT_ATTACK : BT_ALTATTACK;
 	}
 
 	bool WIMPHijackMouseInput(HDPlayerPawn Owner, WIMPItemStorage WIS)
@@ -244,11 +246,16 @@ class WIMPack : Inventory
 		if (PressingFiremode(Owner))
 		{
 			int inputAmount = GetMouseY(Owner, true);
-			if (inputAmount < -ScrollingInSens) WIS.PrevItem();
-			else if (inputAmount > ScrollingInSens) WIS.NextItem();
+			if (inputAmount < -ScrollingInSens)
+				WIS.PrevItem();
+
+			else if (inputAmount > ScrollingInSens)
+				WIS.NextItem();
 
 			ignoreBPReady = true;
-		} else {
+		}
+		else
+		{
 			if (JustPressed(Owner, GetCycleInput(true, InvertItemCycling)))
 			{
 				ignoreBPReady = true;
@@ -264,40 +271,6 @@ class WIMPack : Inventory
 		return ignoreBPReady;
 	}
 
-	// This is a bool for skipping A_BPReady
-	// Returns true if UpdateStorage has to be called
-	bool HijackMouseInput(HDPlayerPawn Owner, ItemStorage S)
-	{
-		if (S.Items.Size() < 1) return false;
-
-		bool ignoreBPReady = false;
-
-		if (PressingFiremode(Owner))
-		{
-			int inputAmount = GetMouseY(Owner, true);
-			if (inputAmount < -ScrollingInSens) S.PrevItem();
-			else if (inputAmount > ScrollingInSens) S.NextItem();
-
-			ignoreBPReady = true;
-		}
-		else
-		{
-			if (JustPressed(Owner, GetCycleInput(true, InvertItemCycling)))
-			{
-				ignoreBPReady = true;
-				S.PrevItem();
-				Console.PrintF("hijack: %d", S.SelItemIndex);
-			}
-			else if (JustPressed(Owner, GetCycleInput(false, InvertItemCycling)))
-			{
-				ignoreBPReady = true;
-				S.NextItem();
-				Console.PrintF("hijack: %d", S.SelItemIndex);
-			}
-		}
-		return ignoreBPReady;
-	}
-
 	// Used for switching modes
 	bool CheckSwitch(HDPlayerPawn Owner, ItemStorage S)
 	{
@@ -306,8 +279,11 @@ class WIMPack : Inventory
 
 		if (wimpHasItems || wompHasItems)
 		{
-			if (WIMPMode && !wimpHasItems) WIMPMode = false;
-			else if (!WIMPMode && !wompHasItems) WIMPMode = true;
+			if (WIMPMode && !wimpHasItems)
+				WIMPMode = false;
+
+			else if (!WIMPMode && !wompHasItems)
+				WIMPMode = true;
 		}
 
 		if (
@@ -319,33 +295,7 @@ class WIMPack : Inventory
 			WIMPMode = !WIMPMode;
 			return true;
 		}
+
 		return false;
-	}
-}
-
-class WIMPTest : Inventory
-{
-	Default
-	{
-		-Inventory.INVBAR;
-		+Inventory.UNTOSSABLE;
-	}
-
-	override void DoEffect()
-	{
-		let hdp = HDPlayerPawn(Owner);
-		if (!hdp || !HDBackpack(hdp.Player.ReadyWeapon))
-		{
-			return ;
-		}
-
-		let bak = HDBackpack(hdp.Player.ReadyWeapon);
-		if (
-			(hdp.Player.Buttons & BT_ATTACK && !(hdp.Player.OldButtons & BT_ATTACK))
-			|| (hdp.Player.Buttons & BT_ALTFIRE && !(hdp.Player.OldButtons & BT_ALTFIRE))
-		)
-		{
-			Console.PrintF("test: %d", bak.Storage.SelItemIndex);
-		}
 	}
 }

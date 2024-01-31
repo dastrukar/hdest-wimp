@@ -1,4 +1,0 @@
-GameInfo
-{
-    AddEventHandlers = "WIMP_PurseReplacer"
-}
