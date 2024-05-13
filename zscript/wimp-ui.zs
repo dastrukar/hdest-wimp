@@ -1,5 +1,5 @@
 // UI hell revamped
-const HDWIMP_MAX_ICON_SIZE = 16;
+const HDWIMP_MAX_ICON_SIZE = 12;
 
 class WIMPackOverride : HCItemOverride
 {
@@ -113,63 +113,121 @@ class WIMPackOverride : HCItemOverride
 		return 0, 0, 0, 0;
 	}
 
-	// generic draw text function because managing two draw functions is a pain in the ass
-	// also yes this is horrendous
-	ui void DrawListEntry(
+	ui void DrawItemList(
 		HCStatusBar sb,
-		bool isSelected,
-		string text,
-		string icon,
+		WIMPack wimPack,
+		WIMPItemStorage storage,
+		Vector2 listPos,
+		double textOffset,
 		string cursor,
-		Vector2 textPosition,
-		Vector2 iconPosition,
-		Vector2 cursorPosition,
 		int flags,
-		int textColour,
-		Vector2 scale
+		int normalColour,
+		int selectedColour,
+		bool correctMode,
+		bool isLeft,
+		Vector2 uiScale
 	)
 	{
-		sb.DrawString(
-			sb.pSmallFont,
-			text,
-			textPosition,
-			flags,
-			textColour,
-			scale: scale
-		);
-
-		if (hdwimp_show_icons)
+		int maxCount;
+		float drawOffset;
+		int centerIndex;
+		int indexOffset;
+		float gapWidth = SmallFont.GetCharWidth(">") * uiScale.x;
+		if (storage.Items.Size() > 3)
 		{
-			Vector2 itemSize = TexMan.GetScaledSize(TexMan.CheckForTexture(icon));
-			float itemScale = (itemSize.x >= itemSize.y)? HDWIMP_MAX_ICON_SIZE / itemSize.x : HDWIMP_MAX_ICON_SIZE / itemSize.y;
-			float itemAlpha = (isSelected)? 1.0 : 0.5;
-
-			sb.DrawImage(
-				icon,
-				iconPosition,
-				flags,
-				itemAlpha,
-				scale: (itemScale * scale.x, itemScale * scale.y)
-			);
+			maxCount = 5;
+			drawOffset = -(textOffset * 2);
+			centerIndex = 2;
+			indexOffset = 2;
+		}
+		else if (storage.Items.Size() > 1)
+		{
+			maxCount = 3;
+			drawOffset = -textOffset;
+			centerIndex = 1;
+			indexOffset = 1;
+		}
+		else
+		{
+			maxCount = 1;
+			drawOffset = 0;
+			centerIndex = 0;
+			indexOffset = 0;
 		}
 
-		if (isSelected)
+		for (int i = 0; i < maxCount; ++i)
 		{
+			StorageItem curItem = GetStorageItem(storage, i, indexOffset);
+
+			bool isSelected = (correctMode && i == centerIndex);
+			double xOffset = (hdwimp_show_icons)? HDWIMP_MAX_ICON_SIZE * 2 * uiScale.x : 0;
+			double selectedOffset = (isSelected)? gapWidth * 2 : 0;
+			if (isLeft)
+			{
+				xOffset *= -1;
+				selectedOffset *= -1;
+			}
+
+			selectedOffset += xOffset;
+			int textColour = (isSelected)? selectedColour : normalColour;
+
 			sb.DrawString(
 				sb.pSmallFont,
-				cursor,
-				cursorPosition,
+				curItem.NiceName,
+				listPos + (selectedOffset, drawOffset),
 				flags,
 				textColour,
-				scale: scale
+				scale: uiScale
 			);
+
+			if (hdwimp_show_icons)
+			{
+				Vector2 itemSize = TexMan.GetScaledSize(TexMan.CheckForTexture(curItem.Icons[0]));
+				float itemScale = (itemSize.x >= itemSize.y)? HDWIMP_MAX_ICON_SIZE / itemSize.x : HDWIMP_MAX_ICON_SIZE / itemSize.y;
+				float itemAlpha = (isSelected)? 1.0 : 0.5;
+
+				sb.DrawImage(
+					curItem.Icons[0],
+					listPos + (selectedOffset / 2, drawOffset + (textOffset * 0.25)),
+					flags | sb.DI_ITEM_CENTER,
+					itemAlpha,
+					scale: (itemScale * uiScale.x, itemScale * uiScale.y)
+				);
+			}
+
+			if (isSelected)
+			{
+				sb.DrawString(
+					sb.pSmallFont,
+					cursor,
+					listPos + (0, drawOffset),
+					flags,
+					textColour,
+					scale: uiScale
+				);
+			}
+
+			if (maxCount == 5 && CheckIfStorageItemLast(storage, i))
+			{
+				sb.DrawString(
+					sb.pSmallFont,
+					"------",
+					listPos + (xOffset, drawOffset + (textOffset / 2)),
+					flags,
+					Font.CR_DARKGRAY,
+					alpha: 0.25,
+					scale: uiScale
+				);
+			}
+
+			drawOffset += textOffset;
 		}
 	}
 
-	ui StorageItem GetStorageItem(WIMPItemStorage W, int index)
+	ui StorageItem GetStorageItem(WIMPItemStorage W, int index, int offset)
 	{
 		int itemCount = W.Items.Size();
-		int itemIndex = (W.SelItemIndex + (index - 2)) % itemCount;
+		int itemIndex = (W.SelItemIndex + (index - offset)) % itemCount;
 		if (itemIndex < 0)
 			itemIndex = itemCount - Abs(itemIndex);
 
@@ -288,55 +346,20 @@ class WIMPackOverride : HCItemOverride
 		// WOMP List
 		if (WOMP.Items.Size())
 		{
-			int maxCount = (WOMP.Items.Size() > 1)? 5 : 1;
-			float drawOffset = (maxCount == 5)? -(textOffset * 2) : 0;
-			float gapWidth = SmallFont.GetCharWidth("<") * uiScale.x;
-
-			for (int i = 0; i < maxCount; ++i)
-			{
-				StorageItem curItem = GetStorageItem(WOMP, i);
-
-				bool isSelected = (
-					!wimPack.WIMPMode &&
-					(i == 2 || maxCount == 1)
-				);
-				bool inWIMP = (WIMP.Items.Find(curItem) != WIMP.ActualIndex.Size());
-				int xOffset = (hdwimp_show_icons)? HDWIMP_MAX_ICON_SIZE * 2 * uiScale.x : 0;
-				int selectedOffset = (isSelected)? gapWidth * -2 : 0;
-				selectedOffset -= xOffset;
-				int textColour =
-					(inWIMP)? (isSelected)? wimpColourSelected : wimpColour :
-					(isSelected)? wompColourSelected : wompColour;
-
-				DrawListEntry(
-					sb,
-					isSelected,
-					curItem.NiceName,
-					curItem.Icons[0],
-					"<",
-					wompListPos + (selectedOffset, drawOffset),
-					wompListPos + (selectedOffset / 2, drawOffset),
-					wompListPos + (0, drawOffset),
-					sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_RIGHT | sb.DI_ITEM_CENTER,
-					textColour,
-					uiScale
-				);
-
-				if (maxCount == 5 && CheckIfStorageItemLast(WOMP, i))
-				{
-					sb.DrawString(
-						sb.pSmallFont,
-						"------",
-						wompListPos + (-xOffset, drawOffset + (textOffset / 2)),
-						sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_RIGHT,
-						Font.CR_DARKGRAY,
-						alpha: 0.25,
-						scale: uiScale
-					);
-				}
-
-				drawOffset += textOffset;
-			}
+			DrawItemList(
+				sb,
+				wimPack,
+				WOMP,
+				wompListPos,
+				textOffset,
+				"<",
+				sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_RIGHT,
+				wompColour,
+				wompColourSelected,
+				(!wimPack.WIMPMode),
+				true,
+				uiScale
+			);
 		}
 		else
 		{
@@ -353,52 +376,20 @@ class WIMPackOverride : HCItemOverride
 		// WIMP List
 		if (WIMP.Items.Size())
 		{
-			int maxCount = (WIMP.Items.Size() > 1)? 5 : 1;
-			float drawOffset = (maxCount == 5)? -(textOffset * 2) : 0;
-			float gapWidth = SmallFont.GetCharWidth(">") * uiScale.x;
-
-			for (int i = 0; i < maxCount; ++i)
-			{
-				StorageItem curItem = GetStorageItem(WIMP, i);
-
-				bool isSelected = (
-					wimPack.WIMPMode &&
-					(i == 2 || maxCount == 1)
-				);
-				int xOffset = (hdwimp_show_icons)? HDWIMP_MAX_ICON_SIZE * 2 * uiScale.x : 0;
-				int selectedOffset = (isSelected)? gapWidth * 2 : 0;
-				selectedOffset += xOffset;
-				int textColour = (isSelected)? wimpColourSelected : wimpColour;
-
-				DrawListEntry(
-					sb,
-					isSelected,
-					curItem.NiceName,
-					curItem.Icons[0],
-					">",
-					wimpListPos + (selectedOffset, drawOffset),
-					wimpListPos + (selectedOffset / 2, drawOffset),
-					wimpListPos + (0, drawOffset),
-					sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_LEFT | sb.DI_ITEM_CENTER,
-					textColour,
-					uiScale
-				);
-
-				if (maxCount == 5 && CheckIfStorageItemLast(WIMP, i))
-				{
-					sb.DrawString(
-						sb.pSmallFont,
-						"------",
-						wimpListPos + (xOffset, drawOffset + (textOffset / 2)),
-						sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_LEFT,
-						Font.CR_DARKGRAY,
-						alpha: 0.25,
-						scale: uiScale
-					);
-				}
-
-				drawOffset += textOffset;
-			}
+			DrawItemList(
+				sb,
+				wimPack,
+				WIMP,
+				wimpListPos,
+				textOffset,
+				">",
+				sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_LEFT,
+				wimpColour,
+				wimpColourSelected,
+				(wimPack.WIMPMode),
+				false,
+				uiScale
+			);
 		}
 		else
 		{
