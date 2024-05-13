@@ -322,7 +322,7 @@ class WIMPackOverride : HCItemOverride
 					uiScale
 				);
 
-				if (CheckIfStorageItemLast(WOMP, i))
+				if (maxCount == 5 && CheckIfStorageItemLast(WOMP, i))
 				{
 					sb.DrawString(
 						sb.pSmallFont,
@@ -384,7 +384,7 @@ class WIMPackOverride : HCItemOverride
 					uiScale
 				);
 
-				if (CheckIfStorageItemLast(WIMP, i))
+				if (maxCount == 5 && CheckIfStorageItemLast(WIMP, i))
 				{
 					sb.DrawString(
 						sb.pSmallFont,
