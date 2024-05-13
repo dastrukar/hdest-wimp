@@ -176,6 +176,16 @@ class WIMPackOverride : HCItemOverride
 		return W.Items[itemIndex];
 	}
 
+	ui bool CheckIfStorageItemLast(WIMPItemStorage W, int index)
+	{
+		int itemCount = W.Items.Size();
+		int itemIndex = (W.SelItemIndex + (index - 2)) % itemCount;
+		if (itemIndex < 0)
+			itemIndex = itemCount - Abs(itemIndex);
+
+		return (itemIndex == itemCount - 1);
+	}
+
 	ui void DrawWIMPHUDStuff(
 		HCStatusBar sb,
 		ItemStorage storage,
@@ -291,8 +301,9 @@ class WIMPackOverride : HCItemOverride
 					(i == 2 || maxCount == 1)
 				);
 				bool inWIMP = (WIMP.Items.Find(curItem) != WIMP.ActualIndex.Size());
+				int xOffset = (hdwimp_show_icons)? HDWIMP_MAX_ICON_SIZE * 2 * uiScale.x : 0;
 				int selectedOffset = (isSelected)? gapWidth * -2 : 0;
-				selectedOffset -= (hdwimp_show_icons)? HDWIMP_MAX_ICON_SIZE * 2 * uiScale.x : 0;
+				selectedOffset -= xOffset;
 				int textColour =
 					(inWIMP)? (isSelected)? wimpColourSelected : wimpColour :
 					(isSelected)? wompColourSelected : wompColour;
@@ -310,6 +321,19 @@ class WIMPackOverride : HCItemOverride
 					textColour,
 					uiScale
 				);
+
+				if (CheckIfStorageItemLast(WOMP, i))
+				{
+					sb.DrawString(
+						sb.pSmallFont,
+						"------",
+						wompListPos + (-xOffset, drawOffset + (textOffset / 2)),
+						sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_RIGHT,
+						Font.CR_DARKGRAY,
+						alpha: 0.25,
+						scale: uiScale
+					);
+				}
 
 				drawOffset += textOffset;
 			}
@@ -341,8 +365,9 @@ class WIMPackOverride : HCItemOverride
 					wimPack.WIMPMode &&
 					(i == 2 || maxCount == 1)
 				);
+				int xOffset = (hdwimp_show_icons)? HDWIMP_MAX_ICON_SIZE * 2 * uiScale.x : 0;
 				int selectedOffset = (isSelected)? gapWidth * 2 : 0;
-				selectedOffset += (hdwimp_show_icons)? HDWIMP_MAX_ICON_SIZE * 2 * uiScale.x : 0;
+				selectedOffset += xOffset;
 				int textColour = (isSelected)? wimpColourSelected : wimpColour;
 
 				DrawListEntry(
@@ -358,6 +383,19 @@ class WIMPackOverride : HCItemOverride
 					textColour,
 					uiScale
 				);
+
+				if (CheckIfStorageItemLast(WIMP, i))
+				{
+					sb.DrawString(
+						sb.pSmallFont,
+						"------",
+						wimpListPos + (xOffset, drawOffset + (textOffset / 2)),
+						sb.DI_SCREEN_CENTER | sb.DI_TEXT_ALIGN_LEFT,
+						Font.CR_DARKGRAY,
+						alpha: 0.25,
+						scale: uiScale
+					);
+				}
 
 				drawOffset += textOffset;
 			}
