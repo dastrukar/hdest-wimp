@@ -116,7 +116,8 @@ class WIMPackOverride : HCItemOverride
 	ui void DrawItemList(
 		HCStatusBar sb,
 		WIMPack wimPack,
-		WIMPItemStorage storage,
+		WIMPItemStorage W,
+		ItemStorage storage,
 		Vector2 listPos,
 		double textOffset,
 		string cursor,
@@ -133,14 +134,14 @@ class WIMPackOverride : HCItemOverride
 		int centerIndex;
 		int indexOffset;
 		float gapWidth = SmallFont.GetCharWidth(">") * uiScale.x;
-		if (storage.Items.Size() > 3)
+		if (W.Items.Size() > 3)
 		{
 			maxCount = 5;
 			drawOffset = -(textOffset * 2);
 			centerIndex = 2;
 			indexOffset = 2;
 		}
-		else if (storage.Items.Size() > 1)
+		else if (W.Items.Size() > 1)
 		{
 			maxCount = 3;
 			drawOffset = -textOffset;
@@ -157,7 +158,9 @@ class WIMPackOverride : HCItemOverride
 
 		for (int i = 0; i < maxCount; ++i)
 		{
-			StorageItem curItem = GetStorageItem(storage, i, indexOffset);
+			StorageItem curItem = GetStorageItem(W, storage, i, indexOffset);
+			if (!curItem)
+				continue;
 
 			bool isSelected = (correctMode && i == centerIndex);
 			double xOffset = (hdwimp_show_icons)? HDWIMP_MAX_ICON_SIZE * 2 * uiScale.x : 0;
@@ -207,7 +210,7 @@ class WIMPackOverride : HCItemOverride
 				);
 			}
 
-			if (maxCount == 5 && CheckIfStorageItemLast(storage, i))
+			if (maxCount == 5 && CheckIfStorageItemLast(W, i))
 			{
 				sb.DrawString(
 					sb.pSmallFont,
@@ -224,14 +227,21 @@ class WIMPackOverride : HCItemOverride
 		}
 	}
 
-	ui StorageItem GetStorageItem(WIMPItemStorage W, int index, int offset)
+	ui StorageItem GetStorageItem(WIMPItemStorage W, ItemStorage storage, int index, int offset)
 	{
 		int itemCount = W.Items.Size();
+		if (itemCount <= 0)
+			return null;
+
 		int itemIndex = (W.SelItemIndex + (index - offset)) % itemCount;
 		if (itemIndex < 0)
 			itemIndex = itemCount - Abs(itemIndex);
 
-		return W.Items[itemIndex];
+		int actualIndex = W.GetActualIndex(itemIndex);
+		if (Storage.Items.Size() <= actualIndex)
+			return null;
+
+		return storage.Items[actualIndex];
 	}
 
 	ui bool CheckIfStorageItemLast(WIMPItemStorage W, int index)
@@ -350,6 +360,7 @@ class WIMPackOverride : HCItemOverride
 				sb,
 				wimPack,
 				WOMP,
+				storage,
 				wompListPos,
 				textOffset,
 				"<",
@@ -380,6 +391,7 @@ class WIMPackOverride : HCItemOverride
 				sb,
 				wimPack,
 				WIMP,
+				storage,
 				wimpListPos,
 				textOffset,
 				">",
@@ -405,7 +417,12 @@ class WIMPackOverride : HCItemOverride
 
 		// Item info
 		Vector2 itemInfoPos = (0, wompListPos.y + (textOffset * 4));
-		StorageItem selItem = storage.Items[storage.SelItemIndex];
+		StorageItem selItem;
+		if (wimPack.WIMPMode)
+			GetStorageItem(WIMP, storage, WIMP.SelItemIndex, 0);
+
+		else
+			GetStorageItem(WOMP, storage, WOMP.SelItemIndex, 0);
 
 		if (selItem)
 		{

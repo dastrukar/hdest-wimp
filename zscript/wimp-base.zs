@@ -1,13 +1,74 @@
+// god forbid someone uses their own backpack storage solution
+class WIMPStorageItem play
+{
+	class<Inventory> ItemClass;
+	int AmountsFirstItem;
+	int AmountsSize;
+	int WeaponStatusSize;
+	int ActualIndex; // Used for referring back to the original index in HDBackpack Storage
+
+	static WIMPStorageItem Create(StorageItem item, int index)
+	{
+		let newItem = new("WIMPStorageItem");
+		newItem.ItemClass = item.ItemClass;
+		newItem.AmountsFirstItem = (item.Amounts.Size() > 0)? item.Amounts[0] : 0;
+		newItem.AmountsSize = item.Amounts.Size();
+		newItem.WeaponStatusSize = item.WeaponStatus.Size();
+		newItem.ActualIndex = index;
+
+		return newItem;
+	}
+
+	void Update(StorageItem item)
+	{
+		AmountsFirstItem = (item.Amounts.Size() > 0)? item.Amounts[0] : 0;
+		AmountsSize = item.Amounts.Size();
+		WeaponStatusSize = item.WeaponStatus.Size();
+	}
+
+	clearscope bool CheckType(StorageItem item)
+	{
+		return (ItemClass == item.ItemClass);
+	}
+
+	clearscope bool Compare(StorageItem item)
+	{
+		return (
+			ItemClass == item.ItemClass
+			&& AmountsFirstItem == ((item.Amounts.Size() > 0)? item.Amounts[0] : 0)
+			&& AmountsSize == item.Amounts.Size()
+			&& WeaponStatusSize == item.WeaponStatus.Size()
+		);
+	}
+}
+
 class WIMPItemStorage play
 {
-	Array<StorageItem> Items; // Stores items for sorting
-	Array<int> ActualIndex;   // Used for referring back to the original index in Storage
+	Array<WIMPStorageItem> Items; // Stores items for sorting
 	int SelItemIndex;
 
-	clearscope StorageItem GetSelectedItem()
+	clearscope WIMPStorageItem GetSelectedItem()
 	{
 		if (!(SelItemIndex > Items.Size()))
 			return Items[SelItemIndex];
+
+		return null;
+	}
+
+	clearscope int GetActualIndex(int index)
+	{
+		return (Items[index].ActualIndex);
+	}
+
+	clearscope WIMPStorageItem Find(StorageItem item)
+	{
+		foreach (wimpItem : Items)
+		{
+			if (!wimpItem.Compare(item))
+				continue;
+
+			return wimpItem;
+		}
 
 		return null;
 	}
@@ -17,28 +78,29 @@ class WIMPItemStorage play
 		if (!storage)
 			return;
 
-		// just clear it
-		Items.Clear();
-		ActualIndex.Clear();
-
+		Array<WIMPStorageItem> newItems;
 		for (int i = 0; i < storage.Items.Size(); i++)
 		{
 			StorageItem item = storage.Items[i];
 
-			// Is the item in the backpack AND not already in Items?
-			if (
-				item &&
-				!item.HaveNone() &&
-				Items.Find(Item) == Items.Size()
-			)
-			{
-				Items.Push(Item);
-				ActualIndex.Push(i);
-			}
+			// Is the item in the backpack?
+			if (!item || item.HaveNone())
+				continue;
+
+			// don't try to recreate the item because of GC reasons
+			WIMPStorageItem wimpItem = Find(item);
+			if (wimpItem)
+				wimpItem.Update(item);
+
+			else
+				wimpItem = WIMPStorageItem.Create(item, i);
+
+			newItems.Push(wimpItem);
 		}
 
-		if (Items.Size())
-			ClampSelItemIndex();
+		Items.Move(newItems);
+		// if (Items.Size())
+		ClampSelItemIndex();
 	}
 
 	void ClampSelItemIndex()
@@ -70,27 +132,29 @@ class WOMPItemStorage : WIMPItemStorage
 		if (!storage)
 			return;
 
-		// just clear it
-		Items.Clear();
-		ActualIndex.Clear();
-
+		Array<WIMPStorageItem> newItems;
 		for (int i = 0; i < storage.Items.Size(); i++)
 		{
 			StorageItem item = storage.Items[i];
 
-			// Is the item in the backpack AND not already in Items?
-			if (
-				item &&
-				item.InvRef
-			)
-			{
-				Items.Push(item);
-				ActualIndex.Push(i);
-			}
+			// Does the item exist?
+			if (!item || !item.InvRef)
+				continue;
+
+			// don't try to recreate the item because of GC reasons
+			WIMPStorageItem wimpItem = Find(item);
+			if (wimpItem)
+				wimpItem.Update(item);
+
+			else
+				wimpItem = WIMPStorageItem.Create(item, i);
+
+			newItems.Push(wimpItem);
 		}
 
-		if (Items.Size())
-			ClampSelItemIndex();
+		Items.Move(newItems);
+		// if (Items.Size())
+		ClampSelItemIndex();
 	}
 }
 
@@ -207,11 +271,15 @@ class WIMPack : Inventory
 	{
 		WIMP.UpdateStorage(storage);
 		WOMP.UpdateStorage(storage);
-		if (WIMPMode && WIMP.ActualIndex.Size() > 0)
-			storage.SelItemIndex = WIMP.ActualIndex[WIMP.SelItemIndex];
+		WIMPItemStorage selected = null;
+		if (WIMPMode && WIMP.Items.Size() > 0)
+			selected = WIMP;
 
-		else if (WOMP.ActualIndex.Size() > 0)
-			storage.SelItemIndex = WOMP.ActualIndex[WOMP.SelItemIndex];
+		else if (WOMP.Items.Size() > 0)
+			selected = WOMP;
+
+		if (selected)
+			storage.SelItemIndex = min(selected.GetActualIndex(selected.SelItemIndex), storage.Items.Size() - 1);
 	}
 
 	// Handle WIMP inputs
@@ -274,8 +342,8 @@ class WIMPack : Inventory
 	// Used for switching modes
 	bool CheckSwitch(HDPlayerPawn Owner, ItemStorage S)
 	{
-		bool wimpHasItems = (WIMP.ActualIndex.Size() > 0);
-		bool wompHasItems = (WOMP.ActualIndex.Size() > 0);
+		bool wimpHasItems = (WIMP.Items.Size() > 0);
+		bool wompHasItems = (WOMP.Items.Size() > 0);
 
 		if (wimpHasItems || wompHasItems)
 		{
