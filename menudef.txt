@@ -15,6 +15,7 @@ OptionMenu "WIMPOptions" {
 	Option "Invert mode cycling", "hdwimp_invert_mode_cycling", "YesNo"
 	Option "Invert scrolling", "hdwimp_invert_scrolling", "YesNo"
 	Slider "Scrolling insensitivity", "hdwimp_scrolling_sensitivity", 1, 1000, 1
+	Option "Select item on insert/remove", "hdwimp_select_item_on_update", "YesNo"
 
 	StaticText " "
 	StaticText "= UI Options =", "Gold"

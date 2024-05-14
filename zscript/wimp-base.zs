@@ -19,11 +19,23 @@ class WIMPStorageItem play
 		return newItem;
 	}
 
-	void Update(StorageItem item)
+	// returns true if any values actually changed
+	bool Update(StorageItem item, int index)
 	{
+		int oldAmountsFirstItem = AmountsFirstItem;
+		int oldAmountsSize = AmountsSize;
+		int oldWeaponStatusSize = WeaponStatusSize;
+
 		AmountsFirstItem = (item.Amounts.Size() > 0)? item.Amounts[0] : 0;
 		AmountsSize = item.Amounts.Size();
 		WeaponStatusSize = item.WeaponStatus.Size();
+		ActualIndex = index;
+
+		return (
+			oldAmountsFirstItem != AmountsFirstItem
+			|| oldAmountsSize != AmountsSize
+			|| oldWeaponStatusSize != WeaponStatusSize
+		);
 	}
 
 	clearscope bool CheckType(StorageItem item)
@@ -73,7 +85,7 @@ class WIMPItemStorage play
 		return null;
 	}
 
-	virtual void UpdateStorage(ItemStorage storage)
+	virtual void UpdateStorage(ItemStorage storage, bool selectUpdated)
 	{
 		if (!storage)
 			return;
@@ -89,13 +101,16 @@ class WIMPItemStorage play
 
 			// don't try to recreate the item because of GC reasons
 			WIMPStorageItem wimpItem = Find(item);
+			bool changed = (!wimpItem);
 			if (wimpItem)
-				wimpItem.Update(item);
+				changed = wimpItem.Update(item, i);
 
 			else
 				wimpItem = WIMPStorageItem.Create(item, i);
 
 			newItems.Push(wimpItem);
+			if (selectUpdated && changed && newItems.Size() > 0)
+				SelItemIndex = newItems.Size() - 1;
 		}
 
 		Items.Move(newItems);
@@ -127,7 +142,7 @@ class WIMPItemStorage play
 
 class WOMPItemStorage : WIMPItemStorage
 {
-	override void UpdateStorage(ItemStorage storage)
+	override void UpdateStorage(ItemStorage storage, bool selectUpdated)
 	{
 		if (!storage)
 			return;
@@ -143,13 +158,16 @@ class WOMPItemStorage : WIMPItemStorage
 
 			// don't try to recreate the item because of GC reasons
 			WIMPStorageItem wimpItem = Find(item);
+			bool changed = (!wimpItem);
 			if (wimpItem)
-				wimpItem.Update(item);
+				changed = wimpItem.Update(item, i);
 
 			else
 				wimpItem = WIMPStorageItem.Create(item, i);
 
 			newItems.Push(wimpItem);
+			if (selectUpdated && changed && newItems.Size() > 0)
+				SelItemIndex = newItems.Size() - 1;
 		}
 
 		Items.Move(newItems);
@@ -172,6 +190,7 @@ class WIMPack : Inventory
 	transient bool InvertModeCycling;
 	transient bool InvertScrolling;
 	transient int ScrollingInSens;
+	transient CVar SelectItemOnUpdate;
 
 	Default
 	{
@@ -264,13 +283,20 @@ class WIMPack : Inventory
 		InvertModeCycling = CVar.GetCVar("hdwimp_invert_mode_cycling", Player).GetBool();
 		InvertScrolling = CVar.GetCVar("hdwimp_invert_scrolling", Player).GetBool();
 		ScrollingInSens = CVar.GetCVar("hdwimp_scrolling_sensitivity", Player).GetInt();
+		SelectItemOnUpdate = CVar.GetCVar("hdwimp_select_item_on_update", Player);
 	}
 
 	// Helps make sure you stay on the correct index when switching between modes
 	void SyncStorage(ItemStorage storage)
 	{
-		WIMP.UpdateStorage(storage);
-		WOMP.UpdateStorage(storage);
+		bool wimpSelectItem = (SelectItemOnUpdate.GetBool());
+		bool wompSelectItem = (
+			SelectItemOnUpdate.GetBool()
+			&& WIMPMode
+			&& (Owner.Player.Buttons & BT_RELOAD | BT_UNLOAD)
+		);
+		WIMP.UpdateStorage(storage, wimpSelectItem);
+		WOMP.UpdateStorage(storage, wompSelectItem);
 		WIMPItemStorage selected = null;
 		if (WIMPMode && WIMP.Items.Size() > 0)
 			selected = WIMP;
