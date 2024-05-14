@@ -417,12 +417,14 @@ class WIMPackOverride : HCItemOverride
 
 		// Item info
 		Vector2 itemInfoPos = (0, wompListPos.y + (textOffset * 4));
-		StorageItem selItem;
+		WIMPItemStorage W;
 		if (wimPack.WIMPMode)
-			GetStorageItem(WIMP, storage, WIMP.SelItemIndex, 0);
+			W = WIMP;
 
 		else
-			GetStorageItem(WOMP, storage, WOMP.SelItemIndex, 0);
+			W = WOMP;
+
+		StorageItem selItem = GetStorageItem(W, storage, W.SelItemIndex, 0);
 
 		if (selItem)
 		{
