@@ -1,3 +1,0 @@
-GameInfo {
-	AddEventHandlers = "UaS_AmmoPouch_Replacer"
-}
